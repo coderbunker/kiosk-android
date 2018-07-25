@@ -117,6 +117,23 @@ public class KioskActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
+    // This snippet hides the system bars.
+    private void hideNavBar(View view) {
+
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -201,6 +218,8 @@ public class KioskActivity extends Activity {
         dialogPrompted = true;
 
         dialog = new Dialog(webView.getContext());
+        View v = dialog.getWindow().getDecorView();
+        hideNavBar(v);
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
