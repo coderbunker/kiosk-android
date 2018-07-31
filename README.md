@@ -11,3 +11,11 @@ The application covers the following features :
 - Exit kiosk mode with an OTP (One-time password) from Google Authenticator.
 - Modify the URL of the website hosting the video
 
+Setup
+
+1. Open Android Studio
+2. Click on File -> New -> Project from version control -> GitHub
+3. Enter Git Repository URL : https://github.com/coderbunker/kiosk-android
+4. Click on "Clone"
+5. Build and Run !
+
