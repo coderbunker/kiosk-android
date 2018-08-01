@@ -210,6 +210,7 @@ public class KioskActivity extends Activity {
         if(blockedKeys.contains(event.getKeyCode())){
             return true;
         }
+
         return super.onKeyDown(keyCode, event);
     }
 

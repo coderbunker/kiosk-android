@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-    private Button kioskmode, settings;
+    private Button kioskmode, settings, totp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
 
         kioskmode = (Button) findViewById(R.id.button_kioskmode);
         settings = (Button) findViewById(R.id.button_settings);
+        totp = (Button) findViewById(R.id.button_pass);
 
         kioskmode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,6 +34,16 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+        totp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(MainActivity.this, TOTPActivity.class);
                 startActivity(intent);
 
             }
