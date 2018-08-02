@@ -19,3 +19,9 @@ Setup
 4. Click on "Clone"
 5. Build and Run !
 
+Kiosk mode 
+
+The default password is : 1234
+The default URL is : https://naibaben.github.io/
+
+Both can be changed in the "settings" activity/screen
