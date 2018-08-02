@@ -6,13 +6,27 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.coderbunker.kioskapp.lib.SaveAndLoad;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +38,7 @@ import java.util.TimerTask;
 public class KioskActivity extends Activity {
 
     private final Context context = this;
-    private  WebView webView;
+    private WebView webView;
     private static String password = "1234";
     private static String URL = "https://naibaben.github.io/";
 
@@ -45,7 +59,7 @@ public class KioskActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-     //Do nothing...
+        //Do nothing...
     }
 
     @Override
@@ -68,8 +82,65 @@ public class KioskActivity extends Activity {
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
         webView.setWebViewClient(new KioskWebviewClient());
+
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(URL);
+
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setAppCachePath(Environment.getDownloadCacheDirectory().getAbsolutePath());
+        webView.getSettings().setAppCacheEnabled(true);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        //Do not zoom
+        webView.getSettings().setBuiltInZoomControls(false);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setSupportZoom(false);
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                System.out.println("Test");
+                Log.d("MyApplication", consoleMessage.message() + " -- From line "
+                        + consoleMessage.lineNumber() + " of "
+                        + consoleMessage.sourceId());
+                return true;
+            }
+
+        });
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://naibaben.github.io/";
+        String video_url = "https://naibaben.github.io/mov_bbb.mp4";
+
+        StringRequest htmlPage = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println(response);
+                        webView.loadDataWithBaseURL("file:/" + Environment.getExternalStorageDirectory().getAbsolutePath(), response, null, null, null);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, "Fail to load URL", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        StringRequest videoContent = new StringRequest(Request.Method.GET, video_url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        SaveAndLoad.writeToFile("video.mp4", response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, "Fail to load URL", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        queue.add(videoContent);
+        queue.add(htmlPage);
+
 
         webView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -77,7 +148,7 @@ public class KioskActivity extends Activity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
-                if(!dialogPrompted && locked) {
+                if (!dialogPrompted && locked) {
                     askPassword();
                     return true;
                 } else
@@ -133,26 +204,22 @@ public class KioskActivity extends Activity {
     }
 
 
-
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             hideSystemUI();
-        }else{
+        } else {
             hideSystemUI();
         }
     }
 
 
-    public static void setPassword(String newPwd)
-    {
+    public static void setPassword(String newPwd) {
         password = newPwd;
     }
 
-    public static void setURL(String newURL)
-    {
+    public static void setURL(String newURL) {
         URL = newURL;
     }
 
@@ -207,14 +274,13 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(blockedKeys.contains(event.getKeyCode())){
+        if (blockedKeys.contains(event.getKeyCode())) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    private void askPassword()
-    {
+    private void askPassword() {
         dialogPrompted = true;
 
         dialog = new Dialog(webView.getContext());
