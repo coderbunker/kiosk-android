@@ -21,7 +21,7 @@ Setup
 
 Kiosk mode 
 
-The default password is : 1234
-The default URL is : https://naibaben.github.io/
+- The default password is : 1234
+- The default URL is : https://naibaben.github.io/
 
 Both can be changed in the "settings" activity/screen
