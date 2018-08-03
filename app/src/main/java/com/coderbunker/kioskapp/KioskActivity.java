@@ -24,7 +24,7 @@ import java.util.TimerTask;
 public class KioskActivity extends Activity {
 
     private final Context context = this;
-    private  WebView webView;
+    private WebView webView;
     private static String password = "1234";
     private static String URL = "https://naibaben.github.io/";
 
@@ -35,7 +35,7 @@ public class KioskActivity extends Activity {
     private boolean locked = false;
     private Dialog dialog;
 
-    private Button b1, b2, b3, b4;
+    private Button b1, b2, b3, b4, b5, b6;
     private Button n0, n1, n2, n3, n4, n5, n6, n7, n8, n9;
     private ArrayList<Button> numbers;
 
@@ -45,7 +45,7 @@ public class KioskActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-     //Do nothing...
+        //Do nothing...
     }
 
     @Override
@@ -77,7 +77,7 @@ public class KioskActivity extends Activity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
-                if(!dialogPrompted && locked) {
+                if (!dialogPrompted && locked) {
                     askPassword();
                     return true;
                 } else
@@ -133,26 +133,18 @@ public class KioskActivity extends Activity {
     }
 
 
-
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             hideSystemUI();
-        }else{
+        } else {
             hideSystemUI();
         }
     }
 
 
-    public static void setPassword(String newPwd)
-    {
-        password = newPwd;
-    }
-
-    public static void setURL(String newURL)
-    {
+    public static void setURL(String newURL) {
         URL = newURL;
     }
 
@@ -171,9 +163,15 @@ public class KioskActivity extends Activity {
             case 3:
                 b4.setText(number);
                 break;
+            case 4:
+                b5.setText(number);
+                break;
+            case 5:
+                b6.setText(number);
+                break;
         }
 
-        if (cptPwd == 3) {
+        if (cptPwd == 5) {
             cptPwd = 0;
             checkPwd();
         } else
@@ -207,14 +205,13 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(blockedKeys.contains(event.getKeyCode())){
+        if (blockedKeys.contains(event.getKeyCode())) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    private void askPassword()
-    {
+    private void askPassword() {
         dialogPrompted = true;
 
         dialog = new Dialog(webView.getContext());
@@ -235,6 +232,9 @@ public class KioskActivity extends Activity {
         b2 = dialog.findViewById(R.id.b2);
         b3 = dialog.findViewById(R.id.b3);
         b4 = dialog.findViewById(R.id.b4);
+        b5 = dialog.findViewById(R.id.b5);
+        b6 = dialog.findViewById(R.id.b6);
+
 
         n0 = dialog.findViewById(R.id.number0);
         n1 = dialog.findViewById(R.id.number1);

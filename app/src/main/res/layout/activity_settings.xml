@@ -14,22 +14,20 @@
 
 
         <TextView
-            android:id="@+id/textView_password"
+            android:id="@+id/textView_otp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="22dp"
             android:gravity="center_horizontal"
             android:paddingVertical="20dp"
-            android:text="Password" />
+            android:text="OTP"
+            android:textColor="@android:color/black"
+            android:textSize="22dp" />
 
-        <EditText
-            android:id="@+id/editText_password"
+        <ImageView
+            android:id="@+id/imgQRCode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="numberPassword"
-            android:hint="Enter the new password here..."/>
+            android:src="@drawable/ic_launcher_background" />
 
         <TextView
             android:id="@+id/textView_URL"
