@@ -129,7 +129,7 @@ public class KioskActivity extends Activity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        SaveAndLoad.writeToFile("video.mp4", response);
+                        SaveAndLoad.writeToFile("mov_bbb.mp4", response);
                     }
                 }, new Response.ErrorListener() {
             @Override
