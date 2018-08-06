@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -13,6 +14,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.coderbunker.kioskapp.lib.TOTP;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +46,8 @@ public class KioskActivity extends Activity {
     private int cptPwd;
 
     private Timer timerLock, timerNav;
+
+    private SharedPreferences prefs;
 
     @Override
     public void onBackPressed() {
@@ -86,6 +92,9 @@ public class KioskActivity extends Activity {
 
             }
         });
+
+        prefs = this.getSharedPreferences(
+                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         TimerTask lock = new TimerTask() {
             @Override
@@ -180,13 +189,18 @@ public class KioskActivity extends Activity {
     }
 
     private void checkPwd() {
-        String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString();
-        if (password.equals(pwd)) {
-            finish();
+        String otp = prefs.getString("otp", null);
+        String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
+        String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
+        String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
+        if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
+            Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
+            finish();
         } else {
             dialog.dismiss();
             dialogPrompted = false;
+            Toast.makeText(context, "Wrong PIN", Toast.LENGTH_SHORT).show();
         }
 
         cptPwd = 0;
@@ -205,8 +219,10 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
         if (blockedKeys.contains(event.getKeyCode())) {
-            return true;
+            Toast.makeText(context, "Blocked", Toast.LENGTH_SHORT).show();
+            return false;
         }
         return super.onKeyDown(keyCode, event);
     }

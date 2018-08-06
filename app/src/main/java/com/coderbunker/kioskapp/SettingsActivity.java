@@ -85,7 +85,7 @@ public class SettingsActivity extends Activity {
             editor.apply();
         }
 
-        otp_uri = "otpauth://totp/Admin:coderbunker.com?secret=" + otp + "&issuer=Coderbunker";
+        otp_uri = "otpauth://totp/Admin?secret=" + otp + "&issuer=Coderbunker";
 
         generateQRCode(otp_uri);
     }
