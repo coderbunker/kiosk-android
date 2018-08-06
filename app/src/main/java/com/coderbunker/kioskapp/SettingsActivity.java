@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Button;
@@ -27,7 +28,7 @@ public class SettingsActivity extends Activity {
 
     private Context context = this;
     private EditText editURL;
-    private Button saveChanges;
+    private SharedPreferences prefs;
 
     private ImageView imgQRCode;
 
@@ -38,34 +39,31 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        SharedPreferences prefs = this.getSharedPreferences(
+        prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         imgQRCode = findViewById(R.id.imgQRCode);
         editURL = findViewById(R.id.editText_URL);
 
-        saveChanges = findViewById(R.id.button_save);
-        saveChanges.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
+        /* TODO Save after button press or change listener
 
-                boolean changed = false;
-                String url = editURL.getText().toString();
+        boolean changed = false;
+        String url = editURL.getText().toString();
 
-                if (url != "" && URLUtil.isValidUrl(url)) {
-                    KioskActivity.setURL(editURL.getText().toString());
-                    changed = true;
-                }
+        if (url != "" && URLUtil.isValidUrl(url)) {
+            prefs.edit().putString("url", url).apply();
+            changed = true;
+        }
 
-                if (changed)
-                    Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
-
-                finish();
-            }
-        });
+        if (changed)
+            Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();*/
 
         String otp = prefs.getString("otp", null);
+        String url = prefs.getString("url", "https://naibaben.github.io/");
+
+        editURL.setText(url);
+
         if (otp == null) {
 
             byte key_1 = (byte) Math.floor(Math.random() * 10);

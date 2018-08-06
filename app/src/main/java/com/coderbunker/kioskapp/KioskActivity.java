@@ -30,7 +30,7 @@ public class KioskActivity extends Activity {
     private final Context context = this;
     private WebView webView;
     private static String password = "1234";
-    private static String URL = "https://naibaben.github.io/";
+    private static String URL = "";
 
     private final List blockedKeys = new ArrayList(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
@@ -71,6 +71,11 @@ public class KioskActivity extends Activity {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        prefs = this.getSharedPreferences(
+                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
+
+        URL = prefs.getString("url", "https://naibaben.github.io/");
+
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
         webView.setWebViewClient(new KioskWebviewClient());
@@ -92,9 +97,6 @@ public class KioskActivity extends Activity {
 
             }
         });
-
-        prefs = this.getSharedPreferences(
-                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         TimerTask lock = new TimerTask() {
             @Override
