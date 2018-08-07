@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -13,6 +15,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.coderbunker.kioskapp.lib.TOTP;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +29,9 @@ import java.util.TimerTask;
 public class KioskActivity extends Activity {
 
     private final Context context = this;
-    private  WebView webView;
+    private WebView webView;
     private static String password = "1234";
-    private static String URL = "https://naibaben.github.io/";
+    private static String URL = "";
 
     private final List blockedKeys = new ArrayList(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
@@ -35,7 +40,7 @@ public class KioskActivity extends Activity {
     private boolean locked = false;
     private Dialog dialog;
 
-    private Button b1, b2, b3, b4;
+    private Button b1, b2, b3, b4, b5, b6;
     private Button n0, n1, n2, n3, n4, n5, n6, n7, n8, n9;
     private ArrayList<Button> numbers;
 
@@ -43,9 +48,11 @@ public class KioskActivity extends Activity {
 
     private Timer timerLock, timerNav;
 
+    private SharedPreferences prefs;
+
     @Override
     public void onBackPressed() {
-     //Do nothing...
+        //Do nothing...
     }
 
     @Override
@@ -65,11 +72,17 @@ public class KioskActivity extends Activity {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        prefs = this.getSharedPreferences(
+                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
+
+        URL = prefs.getString("url", "https://naibaben.github.io/");
+
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
         webView.setWebViewClient(new KioskWebviewClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(URL);
+        Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
         webView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -77,7 +90,7 @@ public class KioskActivity extends Activity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
-                if(!dialogPrompted && locked) {
+                if (!dialogPrompted && locked) {
                     askPassword();
                     return true;
                 } else
@@ -133,26 +146,18 @@ public class KioskActivity extends Activity {
     }
 
 
-
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             hideSystemUI();
-        }else{
+        } else {
             hideSystemUI();
         }
     }
 
 
-    public static void setPassword(String newPwd)
-    {
-        password = newPwd;
-    }
-
-    public static void setURL(String newURL)
-    {
+    public static void setURL(String newURL) {
         URL = newURL;
     }
 
@@ -171,9 +176,15 @@ public class KioskActivity extends Activity {
             case 3:
                 b4.setText(number);
                 break;
+            case 4:
+                b5.setText(number);
+                break;
+            case 5:
+                b6.setText(number);
+                break;
         }
 
-        if (cptPwd == 3) {
+        if (cptPwd == 5) {
             cptPwd = 0;
             checkPwd();
         } else
@@ -181,14 +192,31 @@ public class KioskActivity extends Activity {
 
     }
 
-    private void checkPwd() {
-        String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString();
-        if (password.equals(pwd)) {
-            finish();
+    private void launchHome() {
+        Intent intent = new Intent(KioskActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
 
+    private void checkPwd() {
+        String otp = prefs.getString("otp", null);
+        if (otp == null) {
+            Toast.makeText(context, "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
+            launchHome();
         } else {
-            dialog.dismiss();
-            dialogPrompted = false;
+            String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
+            String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
+            String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
+
+            if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
+                Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
+                launchHome();
+            } else {
+                dialog.dismiss();
+                dialogPrompted = false;
+                Toast.makeText(context, "Wrong PIN", Toast.LENGTH_SHORT).show();
+            }
         }
 
         cptPwd = 0;
@@ -196,8 +224,6 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-
-
         if (blockedKeys.contains(event.getKeyCode())) {
             return true;
         } else {
@@ -207,14 +233,15 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(blockedKeys.contains(event.getKeyCode())){
-            return true;
+        Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
+        if (blockedKeys.contains(event.getKeyCode())) {
+            Toast.makeText(context, "Blocked", Toast.LENGTH_SHORT).show();
+            return false;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    private void askPassword()
-    {
+    private void askPassword() {
         dialogPrompted = true;
 
         dialog = new Dialog(webView.getContext());
@@ -235,6 +262,9 @@ public class KioskActivity extends Activity {
         b2 = dialog.findViewById(R.id.b2);
         b3 = dialog.findViewById(R.id.b3);
         b4 = dialog.findViewById(R.id.b4);
+        b5 = dialog.findViewById(R.id.b5);
+        b6 = dialog.findViewById(R.id.b6);
+
 
         n0 = dialog.findViewById(R.id.number0);
         n1 = dialog.findViewById(R.id.number1);

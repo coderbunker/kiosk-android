@@ -16,8 +16,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        kioskmode = (Button) findViewById(R.id.button_kioskmode);
-        settings = (Button) findViewById(R.id.button_settings);
+        kioskmode = findViewById(R.id.button_kioskmode);
+        settings = findViewById(R.id.button_settings);
 
         kioskmode.setOnClickListener(new View.OnClickListener() {
             @Override

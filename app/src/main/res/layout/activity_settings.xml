@@ -1,62 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".SettingsActivity">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-
-        <TextView
-            android:id="@+id/textView_password"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="22dp"
-            android:gravity="center_horizontal"
-            android:paddingVertical="20dp"
-            android:text="Password" />
-
-        <EditText
-            android:id="@+id/editText_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="numberPassword"
-            android:hint="Enter the new password here..."/>
-
-        <TextView
-            android:id="@+id/textView_URL"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="22dp"
-            android:gravity="center_horizontal"
-            android:paddingVertical="20dp"
-            android:text="URL" />
-
-        <EditText
-            android:id="@+id/editText_URL"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textUri"
-            android:hint="Enter the URL here..."/>
-
-        <Button
-            android:id="@+id/button_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp"
-            android:text="Save changes" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textView_otp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingVertical="20dp"
+                android:text="TOTP"
+                android:textColor="@android:color/black"
+                android:textSize="22dp" />
 
-</LinearLayout>
+            <ImageView
+                android:id="@+id/imgQRCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/textView_URL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingVertical="20dp"
+                android:text="URL"
+                android:textColor="@android:color/black"
+                android:textSize="22dp" />
+
+            <EditText
+                android:id="@+id/editText_URL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter the URL here..."
+                android:inputType="textUri" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save" />
+
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>
