@@ -7,13 +7,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -79,9 +83,38 @@ public class KioskActivity extends Activity {
 
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
-        webView.setWebViewClient(new KioskWebviewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                TimerTask lock = new TimerTask() {
+                    @Override
+                    public void run() {
+                        locked = true;
+                    }
+                };
+
+                timerLock = new Timer(true);
+                timerLock.schedule(lock, 5000);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.contains(url)) {
+                    view.loadUrl(url);
+                }
+                return true;
+
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                handler.proceed(); //Ignore SSL certificate error
+            }
+        });
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(URL);
+
         Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
         webView.setOnTouchListener(new View.OnTouchListener() {
@@ -99,16 +132,6 @@ public class KioskActivity extends Activity {
 
             }
         });
-
-        TimerTask lock = new TimerTask() {
-            @Override
-            public void run() {
-                locked = true;
-            }
-        };
-
-        timerLock = new Timer(true);
-        timerLock.schedule(lock, 5000);
 
         numbers = new ArrayList<Button>();
 
