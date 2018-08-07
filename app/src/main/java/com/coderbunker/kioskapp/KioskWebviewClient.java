@@ -4,15 +4,13 @@ import android.net.http.SslError;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 class KioskWebviewClient extends WebViewClient {
 
-    private String URL = "https://naibaben.github.io/";
-
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-        if(url.contains(url)) {
+        if (url.contains(url)) {
             view.loadUrl(url);
         }
         return true;

@@ -28,9 +28,10 @@ public class SettingsActivity extends Activity {
 
     private Context context = this;
     private EditText editURL;
-    private SharedPreferences prefs;
-
     private ImageView imgQRCode;
+    private Button btnSave;
+
+    private SharedPreferences prefs;
 
     private String otp_uri;
 
@@ -44,20 +45,24 @@ public class SettingsActivity extends Activity {
 
         imgQRCode = findViewById(R.id.imgQRCode);
         editURL = findViewById(R.id.editText_URL);
+        btnSave = findViewById(R.id.btnSave);
 
 
-        /* TODO Save after button press or change listener
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean changed = false;
+                String url = editURL.getText().toString();
 
-        boolean changed = false;
-        String url = editURL.getText().toString();
+                if (url != "" && URLUtil.isValidUrl(url)) {
+                    prefs.edit().putString("url", url).apply();
+                    changed = true;
+                }
 
-        if (url != "" && URLUtil.isValidUrl(url)) {
-            prefs.edit().putString("url", url).apply();
-            changed = true;
-        }
-
-        if (changed)
-            Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();*/
+                if (changed)
+                    Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
+            }
+        });
 
         String otp = prefs.getString("otp", null);
         String url = prefs.getString("url", "https://naibaben.github.io/");

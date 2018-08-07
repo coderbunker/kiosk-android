@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -81,6 +82,7 @@ public class KioskActivity extends Activity {
         webView.setWebViewClient(new KioskWebviewClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(URL);
+        Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
         webView.setOnTouchListener(new View.OnTouchListener() {
 
@@ -190,19 +192,31 @@ public class KioskActivity extends Activity {
 
     }
 
+    private void launchHome() {
+        Intent intent = new Intent(KioskActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
     private void checkPwd() {
         String otp = prefs.getString("otp", null);
-        String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
-        String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
-        String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
-
-        if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
-            Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
-            finish();
+        if (otp == null) {
+            Toast.makeText(context, "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
+            launchHome();
         } else {
-            dialog.dismiss();
-            dialogPrompted = false;
-            Toast.makeText(context, "Wrong PIN", Toast.LENGTH_SHORT).show();
+            String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
+            String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
+            String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
+
+            if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
+                Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
+                launchHome();
+            } else {
+                dialog.dismiss();
+                dialogPrompted = false;
+                Toast.makeText(context, "Wrong PIN", Toast.LENGTH_SHORT).show();
+            }
         }
 
         cptPwd = 0;
@@ -210,8 +224,6 @@ public class KioskActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-
-
         if (blockedKeys.contains(event.getKeyCode())) {
             return true;
         } else {
