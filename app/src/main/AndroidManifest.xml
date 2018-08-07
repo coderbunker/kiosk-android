@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:stateNotNeeded="true"
         android:supportsRtl="true">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="landscape">
 
         </activity>
         <activity android:name=".KioskActivity">
@@ -28,7 +30,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingsActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
