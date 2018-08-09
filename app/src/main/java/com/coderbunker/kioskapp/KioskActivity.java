@@ -23,8 +23,6 @@ import android.widget.Toast;
 import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,6 +80,14 @@ public class KioskActivity extends Activity {
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         URL = prefs.getString("url", "https://naibaben.github.io/");
+        String otp = prefs.getString("otp", null);
+
+        if (otp == null) {
+            Intent intent = new Intent(KioskActivity.this, SettingsActivity.class);
+            Toast.makeText(context, "Please setup first the One-Time-Passwords on your phone before you use the kiosk mode.", Toast.LENGTH_LONG).show();
+            startActivity(intent);
+            finish();
+        }
 
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
