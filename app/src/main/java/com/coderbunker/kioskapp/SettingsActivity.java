@@ -2,12 +2,14 @@ package com.coderbunker.kioskapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Button;
@@ -28,25 +30,29 @@ public class SettingsActivity extends Activity {
 
     private Context context = this;
     private EditText editURL;
-    private ImageView imgQRCode;
+    private ImageView imgQRCode, imgQRCodeHOTP;
+    private TextView lblCurrentHOTPCycle;
     private Button btnSave;
 
     private SharedPreferences prefs;
 
-    private String otp_uri;
+    private String otp_uri, hotp_uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         imgQRCode = findViewById(R.id.imgQRCode);
+        imgQRCodeHOTP = findViewById(R.id.imgQRCodeHOTP);
         editURL = findViewById(R.id.editText_URL);
         btnSave = findViewById(R.id.btnSave);
-
+        lblCurrentHOTPCycle = findViewById(R.id.current_hotp_cycle);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,8 +72,11 @@ public class SettingsActivity extends Activity {
 
         String otp = prefs.getString("otp", null);
         String url = prefs.getString("url", "https://naibaben.github.io/");
+        int hotp_counter = prefs.getInt("hotp_counter", 0);
 
         editURL.setText(url);
+
+        lblCurrentHOTPCycle.setText("Current counter cycle: " + hotp_counter);
 
         if (otp == null) {
 
@@ -88,12 +97,14 @@ public class SettingsActivity extends Activity {
             editor.apply();
         }
 
-        otp_uri = "otpauth://totp/Admin?secret=" + otp + "&issuer=Coderbunker";
+        otp_uri = "otpauth://totp/Time%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
+        hotp_uri = "otpauth://hotp/Hash%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
 
-        generateQRCode(otp_uri);
+        generateQRCodeTOTP(otp_uri);
+        generateQRCodeHOTP(hotp_uri);
     }
 
-    private void generateQRCode(String uri) {
+    private void generateQRCodeTOTP(String uri) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
             BitMatrix bitMatrix = writer.encode(uri, BarcodeFormat.QR_CODE, 512, 512);
@@ -109,6 +120,38 @@ public class SettingsActivity extends Activity {
 
         } catch (WriterException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void generateQRCodeHOTP(String uri) {
+        QRCodeWriter writer = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = writer.encode(uri, BarcodeFormat.QR_CODE, 512, 512);
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+            imgQRCodeHOTP.setImageBitmap(bmp);
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

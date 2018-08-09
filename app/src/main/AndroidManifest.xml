@@ -20,7 +20,9 @@
             android:screenOrientation="landscape">
 
         </activity>
-        <activity android:name=".KioskActivity">
+        <activity
+            android:name=".KioskActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

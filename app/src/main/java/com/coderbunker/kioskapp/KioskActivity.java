@@ -15,14 +15,16 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,11 +87,16 @@ public class KioskActivity extends Activity {
         webView = findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient() {
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(final WebView view, String url) {
                 super.onPageFinished(view, url);
                 TimerTask lock = new TimerTask() {
                     @Override
                     public void run() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, "Kioskmode locked", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         locked = true;
                     }
                 };
@@ -134,7 +141,6 @@ public class KioskActivity extends Activity {
         });
 
         numbers = new ArrayList<Button>();
-
     }
 
 
@@ -224,6 +230,7 @@ public class KioskActivity extends Activity {
 
     private void checkPwd() {
         String otp = prefs.getString("otp", null);
+        int hotp_counter = prefs.getInt("hotp_counter", 0);
         if (otp == null) {
             Toast.makeText(context, "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
             launchHome();
@@ -232,8 +239,22 @@ public class KioskActivity extends Activity {
             String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
             String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
+
+            //HOTP
+            for (int i = 0; i < 10; i++) {
+                if (pwd.equals(HOTP.generateHOTP(hotp_counter - 5 + i, otp))) {
+                    Toast.makeText(context, "HOTP PIN correct", Toast.LENGTH_SHORT).show();
+
+                    hotp_counter++;
+                    prefs.edit().putInt("hotp_counter", hotp_counter).apply();
+
+                    launchHome();
+                }
+            }
+
+            //TOTP
             if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
-                Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "TOTP PIN correct", Toast.LENGTH_SHORT).show();
                 launchHome();
             } else {
                 dialog.dismiss();
