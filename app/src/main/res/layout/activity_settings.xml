@@ -109,7 +109,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter the URL here..."
-                android:inputType="textUri" />
+                android:inputType="textUri"
+                android:textColor="#000" />
 
             <Button
                 android:id="@+id/btnSave"
