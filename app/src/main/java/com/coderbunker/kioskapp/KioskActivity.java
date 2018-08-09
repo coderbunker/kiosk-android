@@ -87,11 +87,16 @@ public class KioskActivity extends Activity {
         webView = findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient() {
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(final WebView view, String url) {
                 super.onPageFinished(view, url);
                 TimerTask lock = new TimerTask() {
                     @Override
                     public void run() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, "Kioskmode locked", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         locked = true;
                     }
                 };
@@ -136,7 +141,6 @@ public class KioskActivity extends Activity {
         });
 
         numbers = new ArrayList<Button>();
-
     }
 
 

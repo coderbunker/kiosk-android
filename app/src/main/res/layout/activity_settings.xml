@@ -47,6 +47,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/ic_launcher_background" />
+
+                    <TextView
+                        android:id="@+id/placeholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAlignment="center" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -72,6 +80,15 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/ic_launcher_background" />
+
+                    <TextView
+                        android:id="@+id/current_hotp_cycle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Current cycle: ---"
+                        android:textAlignment="center" />
+
                 </LinearLayout>
 
             </LinearLayout>

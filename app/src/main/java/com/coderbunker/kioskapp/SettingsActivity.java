@@ -31,6 +31,7 @@ public class SettingsActivity extends Activity {
     private Context context = this;
     private EditText editURL;
     private ImageView imgQRCode, imgQRCodeHOTP;
+    private TextView lblCurrentHOTPCycle;
     private Button btnSave;
 
     private SharedPreferences prefs;
@@ -51,7 +52,7 @@ public class SettingsActivity extends Activity {
         imgQRCodeHOTP = findViewById(R.id.imgQRCodeHOTP);
         editURL = findViewById(R.id.editText_URL);
         btnSave = findViewById(R.id.btnSave);
-
+        lblCurrentHOTPCycle = findViewById(R.id.current_hotp_cycle);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +76,8 @@ public class SettingsActivity extends Activity {
 
         editURL.setText(url);
 
+        lblCurrentHOTPCycle.setText("Current counter cycle: " + hotp_counter);
+
         if (otp == null) {
 
             byte key_1 = (byte) Math.floor(Math.random() * 10);
@@ -95,7 +98,7 @@ public class SettingsActivity extends Activity {
         }
 
         otp_uri = "otpauth://totp/Time%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
-        hotp_uri = "otpauth://hotp/Hash%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + hotp_counter + "&algorithm=SHA1";
+        hotp_uri = "otpauth://hotp/Hash%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
 
         generateQRCodeTOTP(otp_uri);
         generateQRCodeHOTP(hotp_uri);
