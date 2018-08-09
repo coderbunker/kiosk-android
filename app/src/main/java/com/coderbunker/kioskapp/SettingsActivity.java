@@ -30,12 +30,12 @@ public class SettingsActivity extends Activity {
 
     private Context context = this;
     private EditText editURL;
-    private ImageView imgQRCode;
+    private ImageView imgQRCode, imgQRCodeHOTP;
     private Button btnSave;
 
     private SharedPreferences prefs;
 
-    private String otp_uri;
+    private String otp_uri, hotp_uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +48,7 @@ public class SettingsActivity extends Activity {
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         imgQRCode = findViewById(R.id.imgQRCode);
+        imgQRCodeHOTP = findViewById(R.id.imgQRCodeHOTP);
         editURL = findViewById(R.id.editText_URL);
         btnSave = findViewById(R.id.btnSave);
 
@@ -70,6 +71,7 @@ public class SettingsActivity extends Activity {
 
         String otp = prefs.getString("otp", null);
         String url = prefs.getString("url", "https://naibaben.github.io/");
+        int hotp_counter = prefs.getInt("hotp_counter", 0);
 
         editURL.setText(url);
 
@@ -92,12 +94,14 @@ public class SettingsActivity extends Activity {
             editor.apply();
         }
 
-        otp_uri = "otpauth://totp/Admin?secret=" + otp + "&issuer=Coderbunker";
+        otp_uri = "otpauth://totp/Time%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
+        hotp_uri = "otpauth://hotp/Hash%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + hotp_counter + "&algorithm=SHA1";
 
-        generateQRCode(otp_uri);
+        generateQRCodeTOTP(otp_uri);
+        generateQRCodeHOTP(hotp_uri);
     }
 
-    private void generateQRCode(String uri) {
+    private void generateQRCodeTOTP(String uri) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
             BitMatrix bitMatrix = writer.encode(uri, BarcodeFormat.QR_CODE, 512, 512);
@@ -110,6 +114,25 @@ public class SettingsActivity extends Activity {
                 }
             }
             imgQRCode.setImageBitmap(bmp);
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void generateQRCodeHOTP(String uri) {
+        QRCodeWriter writer = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = writer.encode(uri, BarcodeFormat.QR_CODE, 512, 512);
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+            imgQRCodeHOTP.setImageBitmap(bmp);
 
         } catch (WriterException e) {
             e.printStackTrace();

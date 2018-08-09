@@ -20,8 +20,11 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -223,6 +226,7 @@ public class KioskActivity extends Activity {
 
     private void checkPwd() {
         String otp = prefs.getString("otp", null);
+        int hotp_counter = prefs.getInt("hotp_counter", 0);
         if (otp == null) {
             Toast.makeText(context, "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
             launchHome();
@@ -231,8 +235,22 @@ public class KioskActivity extends Activity {
             String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
             String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
+
+            //HOTP
+            for (int i = 0; i < 10; i++) {
+                if (pwd.equals(HOTP.generateHOTP(hotp_counter - 5 + i, otp))) {
+                    Toast.makeText(context, "HOTP PIN correct", Toast.LENGTH_SHORT).show();
+
+                    hotp_counter++;
+                    prefs.edit().putInt("hotp_counter", hotp_counter).apply();
+
+                    launchHome();
+                }
+            }
+
+            //TOTP
             if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
-                Toast.makeText(context, "PIN correct", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "TOTP PIN correct", Toast.LENGTH_SHORT).show();
                 launchHome();
             } else {
                 dialog.dismiss();

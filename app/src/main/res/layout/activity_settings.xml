@@ -19,21 +19,62 @@
             android:orientation="vertical">
 
 
-            <TextView
-                android:id="@+id/textView_otp"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingVertical="20dp"
-                android:text="TOTP"
-                android:textColor="@android:color/black"
-                android:textSize="22dp" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/imgQRCode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher_background" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView_otp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:paddingVertical="20dp"
+                        android:text="Time based"
+                        android:textColor="@android:color/black"
+                        android:textSize="22dp" />
+
+                    <ImageView
+                        android:id="@+id/imgQRCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_launcher_background" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView_hotp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:paddingVertical="20dp"
+                        android:text="Counter based"
+                        android:textColor="@android:color/black"
+                        android:textSize="22dp" />
+
+                    <ImageView
+                        android:id="@+id/imgQRCodeHOTP"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_launcher_background" />
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textView_URL"
