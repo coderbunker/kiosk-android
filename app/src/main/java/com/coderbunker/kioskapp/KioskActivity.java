@@ -48,7 +48,7 @@ public class KioskActivity extends Activity {
     private Button n0, n1, n2, n3, n4, n5, n6, n7, n8, n9;
     private ArrayList<Button> numbers;
 
-    private int cptPwd;
+    private int cptPwd, clicks = 0;
 
     private Timer timerLock, timerNav;
 
@@ -130,23 +130,33 @@ public class KioskActivity extends Activity {
 
         Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
+        //Touch events for password
         webView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        clicks = 0;
+                    }
+                }, 500);
+
                 if (!dialogPrompted && locked) {
-                    askPassword();
+                    clicks++;
+                    if (clicks >= 4) {
+                        askPassword();
+                        clicks = 0;
+                    }
                     return true;
                 } else
                     return false;
-
-
             }
         });
 
-        numbers = new ArrayList<Button>();
+        numbers = new ArrayList<>();
     }
 
 
@@ -189,11 +199,6 @@ public class KioskActivity extends Activity {
         } else {
             hideSystemUI();
         }
-    }
-
-
-    public static void setURL(String newURL) {
-        URL = newURL;
     }
 
     public void enterNumber(String number) {
@@ -255,6 +260,7 @@ public class KioskActivity extends Activity {
                     prefs.edit().putInt("hotp_counter", hotp_counter).apply();
 
                     launchHome();
+                    return;
                 }
             }
 
