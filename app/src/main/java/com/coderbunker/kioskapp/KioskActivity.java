@@ -131,21 +131,48 @@ public class KioskActivity extends Activity {
         Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
         //Touch events for password
+        webView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideSystemUI();
+
+                System.out.println("Touch" + clicks);
+
+                if (!dialogPrompted && locked) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            clicks = 0;
+                        }
+                    }, 500);
+                    clicks++;
+                    System.out.println(clicks);
+                    if (clicks >= 4) {
+                        askPassword();
+                        clicks = 0;
+                    }
+                } else {
+
+                }
+            }
+        });
         webView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        clicks = 0;
-                    }
-                }, 500);
+                System.out.println("Touch" + clicks);
 
                 if (!dialogPrompted && locked) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            clicks = 0;
+                        }
+                    }, 500);
                     clicks++;
+                    System.out.println(clicks);
                     if (clicks >= 4) {
                         askPassword();
                         clicks = 0;
