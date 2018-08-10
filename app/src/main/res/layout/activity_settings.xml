@@ -5,6 +5,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF"
     android:orientation="vertical"
     tools:context=".SettingsActivity">
 
@@ -108,13 +109,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter the URL here..."
-                android:inputType="textUri" />
+                android:inputType="textUri"
+                android:textColor="#000" />
 
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save" />
+                android:background="#FFF"
+                android:elevation="4dp"
+                android:text="Save"
+                android:textColor="#000" />
 
 
         </LinearLayout>

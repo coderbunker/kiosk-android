@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
@@ -23,6 +21,8 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.util.UUID;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -97,8 +97,15 @@ public class SettingsActivity extends Activity {
             editor.apply();
         }
 
-        otp_uri = "otpauth://totp/Time%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
-        hotp_uri = "otpauth://hotp/Hash%20based?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
+        String device = prefs.getString("uuid", null);
+
+        if (device == null) {
+            device = UUID.randomUUID().toString();
+            prefs.edit().putString("uuid", device).apply();
+        }
+
+        otp_uri = "otpauth://totp/" + device + "%20-%20Time?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
+        hotp_uri = "otpauth://hotp/" + device + "%20-%20Counter?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
 
         generateQRCodeTOTP(otp_uri);
         generateQRCodeHOTP(hotp_uri);

@@ -23,8 +23,6 @@ import android.widget.Toast;
 import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +48,7 @@ public class KioskActivity extends Activity {
     private Button n0, n1, n2, n3, n4, n5, n6, n7, n8, n9;
     private ArrayList<Button> numbers;
 
-    private int cptPwd;
+    private int cptPwd, clicks = 0;
 
     private Timer timerLock, timerNav;
 
@@ -82,6 +80,14 @@ public class KioskActivity extends Activity {
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
         URL = prefs.getString("url", "https://naibaben.github.io/");
+        String otp = prefs.getString("otp", null);
+
+        if (otp == null) {
+            Intent intent = new Intent(KioskActivity.this, SettingsActivity.class);
+            Toast.makeText(context, "Please setup first the One-Time-Passwords on your phone before you use the kiosk mode.", Toast.LENGTH_LONG).show();
+            startActivity(intent);
+            finish();
+        }
 
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
@@ -124,23 +130,60 @@ public class KioskActivity extends Activity {
 
         Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
 
+        //Touch events for password
+        webView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideSystemUI();
+
+                System.out.println("Touch" + clicks);
+
+                if (!dialogPrompted && locked) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            clicks = 0;
+                        }
+                    }, 500);
+                    clicks++;
+                    System.out.println(clicks);
+                    if (clicks >= 4) {
+                        askPassword();
+                        clicks = 0;
+                    }
+                } else {
+
+                }
+            }
+        });
         webView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 hideSystemUI();
 
+                System.out.println("Touch" + clicks);
+
                 if (!dialogPrompted && locked) {
-                    askPassword();
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            clicks = 0;
+                        }
+                    }, 500);
+                    clicks++;
+                    System.out.println(clicks);
+                    if (clicks >= 4) {
+                        askPassword();
+                        clicks = 0;
+                    }
                     return true;
                 } else
                     return false;
-
-
             }
         });
 
-        numbers = new ArrayList<Button>();
+        numbers = new ArrayList<>();
     }
 
 
@@ -183,11 +226,6 @@ public class KioskActivity extends Activity {
         } else {
             hideSystemUI();
         }
-    }
-
-
-    public static void setURL(String newURL) {
-        URL = newURL;
     }
 
     public void enterNumber(String number) {
@@ -249,6 +287,7 @@ public class KioskActivity extends Activity {
                     prefs.edit().putInt("hotp_counter", hotp_counter).apply();
 
                     launchHome();
+                    return;
                 }
             }
 
