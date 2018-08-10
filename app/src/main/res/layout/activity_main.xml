@@ -7,35 +7,42 @@
     tools:context=".MainActivity">
 
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFF">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+        <Button
+            android:id="@+id/button_kioskmode"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:background="#fff"
+            android:elevation="4dp"
+            android:text="Kiosk mode"
+            android:textColor="#000" />
 
-            <Button
-                android:id="@+id/button_kioskmode"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
-              android:layout_centerInParent="true"
-                android:text="Kiosk mode" />
-
-        </RelativeLayout>
+    </RelativeLayout>
 
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFF">
 
-            <Button
-                android:id="@+id/button_settings"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
-                android:layout_centerInParent="true"
-                android:text="Settings" />
+        <Button
+            android:id="@+id/button_settings"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:background="#fff"
+            android:elevation="4dp"
+            android:text="Settings"
+            android:textColor="#000" />
 
-        </RelativeLayout>
+    </RelativeLayout>
 
 
 
