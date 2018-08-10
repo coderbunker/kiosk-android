@@ -46,6 +46,7 @@ public class KioskActivity extends Activity {
 
     private Button b1, b2, b3, b4, b5, b6;
     private Button n0, n1, n2, n3, n4, n5, n6, n7, n8, n9;
+    private Button c;
     private ArrayList<Button> numbers;
 
     private int cptPwd, clicks = 0;
@@ -360,6 +361,8 @@ public class KioskActivity extends Activity {
         n8 = dialog.findViewById(R.id.number8);
         n9 = dialog.findViewById(R.id.number9);
 
+        c = dialog.findViewById(R.id.clear);
+
         numbers.add(n0);
         numbers.add(n1);
         numbers.add(n2);
@@ -380,6 +383,17 @@ public class KioskActivity extends Activity {
                 }
             });
         }
+
+        c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cptPwd > 0) {
+                    cptPwd--;
+                    enterNumber("");
+                    cptPwd--;
+                }
+            }
+        });
 
         dialog.show();
     }
