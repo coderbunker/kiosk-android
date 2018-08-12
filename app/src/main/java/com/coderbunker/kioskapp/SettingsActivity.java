@@ -71,7 +71,7 @@ public class SettingsActivity extends Activity {
         });
 
         String otp = prefs.getString("otp", null);
-        String url = prefs.getString("url", "https://naibaben.github.io/");
+        String url = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
         int hotp_counter = prefs.getInt("hotp_counter", 0);
 
         editURL.setText(url);

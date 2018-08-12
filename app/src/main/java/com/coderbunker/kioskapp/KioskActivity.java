@@ -92,7 +92,7 @@ public class KioskActivity extends Activity implements Observer {
         prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
-        URL = prefs.getString("url", "https://naibaben.github.io/");
+        URL = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
         String otp = prefs.getString("otp", null);
 
         if (otp == null) {
@@ -140,6 +140,7 @@ public class KioskActivity extends Activity implements Observer {
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.loadUrl(URL);
 
         Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
