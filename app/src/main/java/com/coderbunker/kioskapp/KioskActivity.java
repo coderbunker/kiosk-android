@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -18,22 +20,29 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.coderbunker.kioskapp.facerecognition.CameraPreview;
+import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class KioskActivity extends Activity {
+public class KioskActivity extends Activity implements Observer {
 
     private final Context context = this;
     private WebView webView;
+    private TextView face_detection_score;
     private static String password = "1234";
     private static String URL = "";
 
@@ -54,6 +63,9 @@ public class KioskActivity extends Activity {
     private Timer timerLock, timerNav;
 
     private SharedPreferences prefs;
+
+    private Camera mCamera;
+    private CameraPreview mCameraPreview;
 
     @Override
     public void onBackPressed() {
@@ -92,6 +104,7 @@ public class KioskActivity extends Activity {
 
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
+        face_detection_score = findViewById(R.id.face_detection_score);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(final WebView view, String url) {
@@ -185,6 +198,28 @@ public class KioskActivity extends Activity {
         });
 
         numbers = new ArrayList<>();
+
+
+        if (checkCameraHardware(this)) {
+            mCamera = getCameraInstance();
+            if (mCamera != null) {
+
+                FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
+                faceDetectionListener.addObserver(this);
+                mCamera.setFaceDetectionListener(faceDetectionListener);
+
+                mCameraPreview = new CameraPreview(this, mCamera);
+
+                FrameLayout preview = findViewById(R.id.camera_preview);
+                preview.addView(mCameraPreview);
+
+                mCamera.startPreview();
+            } else {
+
+            }
+        }
+
+
     }
 
 
@@ -398,4 +433,40 @@ public class KioskActivity extends Activity {
         dialog.show();
     }
 
+    public static Camera getCameraInstance() {
+        Camera c = null;
+        try {
+            c = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT); // attempt to get a Camera instance
+        } catch (Exception e) {
+            // Camera is not available (in use or does not exist)
+            e.printStackTrace();
+        }
+        return c; // returns null if camera is unavailable
+    }
+
+    private boolean checkCameraHardware(Context context) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
+    }
+
+    private long last_detected = 0;
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof FaceDetectionListener) {
+            Camera.Face face = ((Camera.Face) arg);
+
+            face_detection_score.setText("Score:" + face.score);
+
+            last_detected = System.currentTimeMillis();
+            if (face.score >= 85 && last_detected <= System.currentTimeMillis() + 5000) {
+                Toast.makeText(context, "Hello face +1", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
