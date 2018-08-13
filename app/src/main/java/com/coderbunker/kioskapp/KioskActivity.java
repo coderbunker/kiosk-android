@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -42,7 +43,7 @@ public class KioskActivity extends Activity implements Observer {
 
     private final Context context = this;
     private WebView webView;
-    private TextView face_detection_score;
+    private TextView face_detection_score, face_counter_view;
     private static String password = "1234";
     private static String URL = "";
 
@@ -105,6 +106,7 @@ public class KioskActivity extends Activity implements Observer {
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
         face_detection_score = findViewById(R.id.face_detection_score);
+        face_counter_view = findViewById(R.id.face_counter);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(final WebView view, String url) {
@@ -140,6 +142,9 @@ public class KioskActivity extends Activity implements Observer {
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setAppCacheEnabled(true);
+        webView.getSettings().setAppCacheMaxSize(5000 * 1000 * 1000);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.loadUrl(URL);
 
@@ -455,7 +460,14 @@ public class KioskActivity extends Activity implements Observer {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
     private long last_detected = 0;
+    private long face_current_counter = 0;
+    private long face_counter = 0;
 
     @Override
     public void update(Observable o, Object arg) {
@@ -464,10 +476,20 @@ public class KioskActivity extends Activity implements Observer {
 
             face_detection_score.setText("Score:" + face.score);
 
-            last_detected = System.currentTimeMillis();
-            if (face.score >= 85 && last_detected <= System.currentTimeMillis() + 5000) {
-                Toast.makeText(context, "Hello face +1", Toast.LENGTH_SHORT).show();
+            if (face.score >= 85) {
+                face_current_counter++;
+            } else {
+                face_current_counter = 0;
             }
+
+            if (face_current_counter >= 5 && last_detected < System.currentTimeMillis() + 45000) {
+                face_counter++;
+                last_detected = System.currentTimeMillis();
+                face_current_counter = -5000;
+            }
+
+            face_counter_view.setText("Viewers: " + face_counter);
+
         }
     }
 }
