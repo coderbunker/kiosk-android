@@ -12,12 +12,15 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -29,10 +32,14 @@ import android.widget.Toast;
 import com.coderbunker.kioskapp.facerecognition.CameraPreview;
 import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 import com.coderbunker.kioskapp.lib.HOTP;
+import com.coderbunker.kioskapp.lib.SaveAndLoad;
 import com.coderbunker.kioskapp.lib.TOTP;
+import com.coderbunker.kioskapp.lib.URLRequest;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +55,7 @@ public class KioskActivity extends Activity implements Observer {
     private WebView webView;
     private TextView face_detection_score, face_counter_view;
     private static String password = "1234";
-    private static String URL = "";
+    private static String url = "";
 
     private final List blockedKeys = new ArrayList(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
@@ -96,7 +103,7 @@ public class KioskActivity extends Activity implements Observer {
         prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
-        URL = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
+        url = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
         String otp = prefs.getString("otp", null);
 
         if (otp == null) {
@@ -130,6 +137,31 @@ public class KioskActivity extends Activity implements Observer {
                 timerLock.schedule(lock, 5000);
             }
 
+            @Nullable
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                System.out.println("Test: " + request.getUrl().toString());
+
+                try {
+                    if (request.getUrl().toString().contains(".mp4") || request.getUrl().toString().contains(".wav")) {
+                        String[] url_parts = request.getUrl().toString().split("/");
+                        String file_name = url_parts[url_parts.length - 1];
+
+                        if (SaveAndLoad.readFromFile(file_name, KioskActivity.this).equals("")) {
+                            String response = URLRequest.requestURL(new URL(request.getUrl().toString()), "GET", "");
+
+                            SaveAndLoad.writeToFile(file_name, response, KioskActivity.this);
+                        }
+                        return new WebResourceResponse(SaveAndLoad.getMimeType(request.getUrl().toString()), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, KioskActivity.this));
+
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+                return super.shouldInterceptRequest(view, request);
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains(url)) {
@@ -150,9 +182,9 @@ public class KioskActivity extends Activity implements Observer {
         webView.getSettings().setAppCacheMaxSize(200 * 1024 * 1024);
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-        webView.loadUrl(URL);
+        webView.loadUrl(url);
 
-        Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Loading " + url, Toast.LENGTH_SHORT).show();
 
         //Touch events for password
         webView.setOnClickListener(new View.OnClickListener() {
@@ -215,14 +247,13 @@ public class KioskActivity extends Activity implements Observer {
             PermissionListener permissionlistener = new PermissionListener() {
                 @Override
                 public void onPermissionGranted() {
-                    try{
+                    try {
                         mCamera.unlock();
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
                     mCamera = getCameraInstance();
                     if (mCamera != null) {
-
                         FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
                         faceDetectionListener.addObserver(KioskActivity.this);
                         mCamera.setFaceDetectionListener(faceDetectionListener);
