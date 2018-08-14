@@ -1,5 +1,6 @@
 package com.coderbunker.kioskapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -29,6 +30,8 @@ import com.coderbunker.kioskapp.facerecognition.CameraPreview;
 import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,10 +144,11 @@ public class KioskActivity extends Activity implements Observer {
                 handler.proceed(); //Ignore SSL certificate error
             }
         });
+
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setAppCacheMaxSize(5000 * 1000 * 1000);
-        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.getSettings().setAppCacheMaxSize(200 * 1024 * 1024);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.loadUrl(URL);
 
@@ -207,22 +211,42 @@ public class KioskActivity extends Activity implements Observer {
 
 
         if (checkCameraHardware(this)) {
-            mCamera = getCameraInstance();
-            if (mCamera != null) {
 
-                FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
-                faceDetectionListener.addObserver(this);
-                mCamera.setFaceDetectionListener(faceDetectionListener);
+            PermissionListener permissionlistener = new PermissionListener() {
+                @Override
+                public void onPermissionGranted() {
+                    try{
+                        mCamera.unlock();
+                    }catch (Exception e){
 
-                mCameraPreview = new CameraPreview(this, mCamera);
+                    }
+                    mCamera = getCameraInstance();
+                    if (mCamera != null) {
 
-                FrameLayout preview = findViewById(R.id.camera_preview);
-                preview.addView(mCameraPreview);
+                        FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
+                        faceDetectionListener.addObserver(KioskActivity.this);
+                        mCamera.setFaceDetectionListener(faceDetectionListener);
 
-                mCamera.startPreview();
-            } else {
+                        mCameraPreview = new CameraPreview(context, mCamera);
 
-            }
+                        FrameLayout preview = findViewById(R.id.camera_preview);
+                        preview.addView(mCameraPreview);
+
+                        mCamera.startPreview();
+                        Toast.makeText(context, "Face recognition started", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(context, "Due a camera issue the face recognition can not be started.", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                    Toast.makeText(context, "Face recognition not active due denied permissions.", Toast.LENGTH_SHORT).show();
+                }
+
+            };
+
+            TedPermission.with(context).setPermissionListener(permissionlistener).setPermissions(Manifest.permission.CAMERA).check();
         }
 
 
@@ -465,31 +489,12 @@ public class KioskActivity extends Activity implements Observer {
         super.onPause();
     }
 
-    private long last_detected = 0;
-    private long face_current_counter = 0;
-    private long face_counter = 0;
-
     @Override
     public void update(Observable o, Object arg) {
         if (o instanceof FaceDetectionListener) {
-            Camera.Face face = ((Camera.Face) arg);
-
-            face_detection_score.setText("Score:" + face.score);
-
-            if (face.score >= 85) {
-                face_current_counter++;
-            } else {
-                face_current_counter = 0;
-            }
-
-            if (face_current_counter >= 5 && last_detected < System.currentTimeMillis() + 45000) {
-                face_counter++;
-                last_detected = System.currentTimeMillis();
-                face_current_counter = -5000;
-            }
-
-            face_counter_view.setText("Viewers: " + face_counter);
-
+            Camera.Face[] faces = ((Camera.Face[]) arg);
+            //face_detection_score.setText("Faces:" + faces.length);
+            face_counter_view.setText("Current faces: " + faces.length);
         }
     }
 }
