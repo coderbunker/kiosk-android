@@ -38,8 +38,6 @@ import com.coderbunker.kioskapp.lib.URLRequest;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +75,8 @@ public class KioskActivity extends Activity implements Observer {
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+
+    private boolean enableCaching = false;
 
     @Override
     public void onBackPressed() {
@@ -142,23 +142,18 @@ public class KioskActivity extends Activity implements Observer {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 System.out.println("Test: " + request.getUrl().toString());
 
-                try {
+                if (enableCaching) {
                     if (request.getUrl().toString().contains(".mp4") || request.getUrl().toString().contains(".wav")) {
                         String[] url_parts = request.getUrl().toString().split("/");
                         String file_name = url_parts[url_parts.length - 1];
 
                         if (SaveAndLoad.readFromFile(file_name, KioskActivity.this).equals("")) {
-                            String response = URLRequest.requestURL(new URL(request.getUrl().toString()), "GET", "");
-
-                            SaveAndLoad.writeToFile(file_name, response, KioskActivity.this);
+                            URLRequest.startDownload(request.getUrl().toString(), file_name);
                         }
                         return new WebResourceResponse(SaveAndLoad.getMimeType(request.getUrl().toString()), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, KioskActivity.this));
 
                     }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
                 }
-
                 return super.shouldInterceptRequest(view, request);
             }
 
