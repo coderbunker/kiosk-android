@@ -1,5 +1,6 @@
 package com.coderbunker.kioskapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -11,12 +12,15 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,7 +32,11 @@ import android.widget.Toast;
 import com.coderbunker.kioskapp.facerecognition.CameraPreview;
 import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 import com.coderbunker.kioskapp.lib.HOTP;
+import com.coderbunker.kioskapp.lib.SaveAndLoad;
 import com.coderbunker.kioskapp.lib.TOTP;
+import com.coderbunker.kioskapp.lib.URLRequest;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +53,7 @@ public class KioskActivity extends Activity implements Observer {
     private WebView webView;
     private TextView face_detection_score, face_counter_view;
     private static String password = "1234";
-    private static String URL = "";
+    private static String url = "";
 
     private final List blockedKeys = new ArrayList(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
@@ -67,6 +75,8 @@ public class KioskActivity extends Activity implements Observer {
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+
+    private boolean enableCaching = false;
 
     @Override
     public void onBackPressed() {
@@ -93,7 +103,7 @@ public class KioskActivity extends Activity implements Observer {
         prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
 
-        URL = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
+        url = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
         String otp = prefs.getString("otp", null);
 
         if (otp == null) {
@@ -127,6 +137,26 @@ public class KioskActivity extends Activity implements Observer {
                 timerLock.schedule(lock, 5000);
             }
 
+            @Nullable
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                System.out.println("Test: " + request.getUrl().toString());
+
+                if (enableCaching) {
+                    if (request.getUrl().toString().contains(".mp4") || request.getUrl().toString().contains(".wav")) {
+                        String[] url_parts = request.getUrl().toString().split("/");
+                        String file_name = url_parts[url_parts.length - 1];
+
+                        if (SaveAndLoad.readFromFile(file_name, KioskActivity.this).equals("")) {
+                            URLRequest.startDownload(request.getUrl().toString(), file_name);
+                        }
+                        return new WebResourceResponse(SaveAndLoad.getMimeType(request.getUrl().toString()), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, KioskActivity.this));
+
+                    }
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains(url)) {
@@ -141,14 +171,15 @@ public class KioskActivity extends Activity implements Observer {
                 handler.proceed(); //Ignore SSL certificate error
             }
         });
+
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setAppCacheMaxSize(5000 * 1000 * 1000);
-        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.getSettings().setAppCacheMaxSize(200 * 1024 * 1024);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-        webView.loadUrl(URL);
+        webView.loadUrl(url);
 
-        Toast.makeText(this, "Loading " + URL, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Loading " + url, Toast.LENGTH_SHORT).show();
 
         //Touch events for password
         webView.setOnClickListener(new View.OnClickListener() {
@@ -207,22 +238,41 @@ public class KioskActivity extends Activity implements Observer {
 
 
         if (checkCameraHardware(this)) {
-            mCamera = getCameraInstance();
-            if (mCamera != null) {
 
-                FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
-                faceDetectionListener.addObserver(this);
-                mCamera.setFaceDetectionListener(faceDetectionListener);
+            PermissionListener permissionlistener = new PermissionListener() {
+                @Override
+                public void onPermissionGranted() {
+                    try {
+                        mCamera.unlock();
+                    } catch (Exception e) {
 
-                mCameraPreview = new CameraPreview(this, mCamera);
+                    }
+                    mCamera = getCameraInstance();
+                    if (mCamera != null) {
+                        FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
+                        faceDetectionListener.addObserver(KioskActivity.this);
+                        mCamera.setFaceDetectionListener(faceDetectionListener);
 
-                FrameLayout preview = findViewById(R.id.camera_preview);
-                preview.addView(mCameraPreview);
+                        mCameraPreview = new CameraPreview(context, mCamera);
 
-                mCamera.startPreview();
-            } else {
+                        FrameLayout preview = findViewById(R.id.camera_preview);
+                        preview.addView(mCameraPreview);
 
-            }
+                        mCamera.startPreview();
+                        Toast.makeText(context, "Face recognition started", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(context, "Due a camera issue the face recognition can not be started.", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                    Toast.makeText(context, "Face recognition not active due denied permissions.", Toast.LENGTH_SHORT).show();
+                }
+
+            };
+
+            TedPermission.with(context).setPermissionListener(permissionlistener).setPermissions(Manifest.permission.CAMERA).check();
         }
 
 
@@ -465,31 +515,12 @@ public class KioskActivity extends Activity implements Observer {
         super.onPause();
     }
 
-    private long last_detected = 0;
-    private long face_current_counter = 0;
-    private long face_counter = 0;
-
     @Override
     public void update(Observable o, Object arg) {
         if (o instanceof FaceDetectionListener) {
-            Camera.Face face = ((Camera.Face) arg);
-
-            face_detection_score.setText("Score:" + face.score);
-
-            if (face.score >= 85) {
-                face_current_counter++;
-            } else {
-                face_current_counter = 0;
-            }
-
-            if (face_current_counter >= 5 && last_detected < System.currentTimeMillis() + 45000) {
-                face_counter++;
-                last_detected = System.currentTimeMillis();
-                face_current_counter = -5000;
-            }
-
-            face_counter_view.setText("Viewers: " + face_counter);
-
+            Camera.Face[] faces = ((Camera.Face[]) arg);
+            //face_detection_score.setText("Faces:" + faces.length);
+            face_counter_view.setText("Current faces: " + faces.length);
         }
     }
 }

@@ -41,7 +41,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="#000"
-        android:text="0"
+        android:text="Current faces: 0"
         android:textColor="#FFF"
         android:textSize="18sp"
         android:visibility="visible"

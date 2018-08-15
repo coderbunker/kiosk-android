@@ -8,17 +8,8 @@ public class FaceDetectionListener extends Observable implements Camera.FaceDete
 
     @Override
     public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-        if (faces.length > 0) {
-            for (Camera.Face face : faces) {
-                try {
-                    /*System.out.println("--------------------------");
-                    System.out.println(face.score);*/
-                    setChanged();
-                    notifyObservers(face);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        setChanged();
+        notifyObservers(faces);
     }
+
 }
