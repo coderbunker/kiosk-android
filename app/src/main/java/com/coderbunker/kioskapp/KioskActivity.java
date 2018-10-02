@@ -1,6 +1,7 @@
 package com.coderbunker.kioskapp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -51,11 +52,10 @@ public class KioskActivity extends Activity implements Observer {
 
     private final Context context = this;
     private WebView webView;
-    private TextView face_detection_score, face_counter_view;
-    private static String password = "1234";
+    private TextView face_counter_view;
     private static String url = "";
 
-    private final List blockedKeys = new ArrayList(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
+    private final List blockedKeys = new ArrayList<>(Arrays.asList(KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
 
     private boolean dialogPrompted = false;
@@ -83,6 +83,8 @@ public class KioskActivity extends Activity implements Observer {
         //Do nothing...
     }
 
+    @SuppressWarnings("deprecation")
+    @SuppressLint({"ClickableViewAccessibility", "SetJavaScriptEnabled"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,7 +117,6 @@ public class KioskActivity extends Activity implements Observer {
 
         //Get the webView and load the URL
         webView = findViewById(R.id.webview);
-        face_detection_score = findViewById(R.id.face_detection_score);
         face_counter_view = findViewById(R.id.face_counter);
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -195,15 +196,13 @@ public class KioskActivity extends Activity implements Observer {
                         public void run() {
                             clicks = 0;
                         }
-                    }, 500);
+                    }, 2000);
                     clicks++;
                     System.out.println(clicks);
                     if (clicks >= 4) {
                         askPassword();
                         clicks = 0;
                     }
-                } else {
-
                 }
             }
         });
@@ -229,8 +228,9 @@ public class KioskActivity extends Activity implements Observer {
                         clicks = 0;
                     }
                     return true;
-                } else
+                } else {
                     return false;
+                }
             }
         });
 
@@ -245,7 +245,7 @@ public class KioskActivity extends Activity implements Observer {
                     try {
                         mCamera.unlock();
                     } catch (Exception e) {
-
+                        //do nothing
                     }
                     mCamera = getCameraInstance();
                     if (mCamera != null) {
@@ -274,8 +274,6 @@ public class KioskActivity extends Activity implements Observer {
 
             TedPermission.with(context).setPermissionListener(permissionlistener).setPermissions(Manifest.permission.CAMERA).check();
         }
-
-
     }
 
 
@@ -489,6 +487,7 @@ public class KioskActivity extends Activity implements Observer {
         dialog.show();
     }
 
+    @SuppressWarnings("deprecation")
     public static Camera getCameraInstance() {
         Camera c = null;
         try {
@@ -501,13 +500,7 @@ public class KioskActivity extends Activity implements Observer {
     }
 
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
     @Override
@@ -519,7 +512,6 @@ public class KioskActivity extends Activity implements Observer {
     public void update(Observable o, Object arg) {
         if (o instanceof FaceDetectionListener) {
             Camera.Face[] faces = ((Camera.Face[]) arg);
-            //face_detection_score.setText("Faces:" + faces.length);
             face_counter_view.setText("Current faces: " + faces.length);
         }
     }

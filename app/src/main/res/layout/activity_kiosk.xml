@@ -22,19 +22,6 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/face_detection_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="21dp"
-        android:layout_marginEnd="30dp"
-        android:text="TextView"
-        android:visibility="gone"
-        tools:layout_editor_absoluteX="758dp"
-        tools:layout_editor_absoluteY="1123dp" />
-
-    <TextView
         android:id="@+id/face_counter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
