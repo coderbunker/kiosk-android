@@ -1,7 +1,6 @@
 package com.coderbunker.kioskapp;
 
 import android.app.Activity;
-import android.content.IntentFilter;
 import android.net.http.SslError;
 import android.support.annotation.Nullable;
 import android.webkit.SslErrorHandler;

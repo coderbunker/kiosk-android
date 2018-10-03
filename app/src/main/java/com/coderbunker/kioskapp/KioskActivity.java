@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -111,10 +112,15 @@ public class KioskActivity extends Activity implements Observer {
         webView.loadUrl(url);
         hideSystemUI(webView);
 
-        AutoWebViewReloader autoWebViewReloader = new AutoWebViewReloader(webView);
-        autoWebViewReloader.register(this);
-
         Toast.makeText(this, "Loading " + url, Toast.LENGTH_SHORT).show();
+
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                AutoWebViewReloader autoWebViewReloader = new AutoWebViewReloader(webView);
+                autoWebViewReloader.register(KioskActivity.this);
+            }
+        });
 
         webView.setOnTouchListener(new View.OnTouchListener() {
 

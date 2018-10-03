@@ -7,16 +7,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 public class AutoWebViewReloader extends BroadcastReceiver {
 
 
     private WebView webView;
+    private NoInternetConnectionPopup noInternetConnectionPopup;
 
     public AutoWebViewReloader(WebView webView) {
         this.webView = webView;
+        noInternetConnectionPopup = new NoInternetConnectionPopup(webView);
     }
 
     @Override
@@ -24,8 +30,9 @@ public class AutoWebViewReloader extends BroadcastReceiver {
         if (isConnected(context)) {
             Toast.makeText(context, "Connected.", Toast.LENGTH_LONG).show();
             webView.reload();
+            noInternetConnectionPopup.dismiss();
         } else {
-            Toast.makeText(context, "Lost connection", Toast.LENGTH_LONG).show();
+            noInternetConnectionPopup.show();
         }
     }
 
