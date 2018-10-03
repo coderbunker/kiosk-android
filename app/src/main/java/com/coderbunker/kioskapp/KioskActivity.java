@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -110,6 +111,9 @@ public class KioskActivity extends Activity implements Observer {
         webView.loadUrl(url);
         hideSystemUI(webView);
 
+        AutoWebViewReloader autoWebViewReloader = new AutoWebViewReloader(webView);
+        autoWebViewReloader.register(this);
+
         Toast.makeText(this, "Loading " + url, Toast.LENGTH_SHORT).show();
 
         webView.setOnTouchListener(new View.OnTouchListener() {
@@ -137,6 +141,7 @@ public class KioskActivity extends Activity implements Observer {
                 }
             }
         });
+
 
         numbers = new ArrayList<>();
 

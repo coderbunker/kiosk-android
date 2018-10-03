@@ -1,6 +1,7 @@
 package com.coderbunker.kioskapp;
 
 import android.app.Activity;
+import android.content.IntentFilter;
 import android.net.http.SslError;
 import android.support.annotation.Nullable;
 import android.webkit.SslErrorHandler;
@@ -22,7 +23,7 @@ class KioskWebViewClient extends WebViewClient {
     private boolean enableCaching = false;
     private Activity activity;
 
-    public KioskWebViewClient(Activity activity) {
+    public KioskWebViewClient(final Activity activity) {
         this.activity = activity;
     }
 
@@ -79,4 +80,5 @@ class KioskWebViewClient extends WebViewClient {
     public boolean isLocked() {
         return locked;
     }
+
 }
