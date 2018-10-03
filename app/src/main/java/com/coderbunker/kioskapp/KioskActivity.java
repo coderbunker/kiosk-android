@@ -11,20 +11,14 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.net.http.SslError;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -33,13 +27,10 @@ import android.widget.Toast;
 import com.coderbunker.kioskapp.facerecognition.CameraPreview;
 import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 import com.coderbunker.kioskapp.lib.HOTP;
-import com.coderbunker.kioskapp.lib.SaveAndLoad;
 import com.coderbunker.kioskapp.lib.TOTP;
-import com.coderbunker.kioskapp.lib.URLRequest;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +51,6 @@ public class KioskActivity extends Activity implements Observer {
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_APP_SWITCH));
 
     private boolean dialogPrompted = false;
-    private boolean locked = false;
     private Dialog dialog;
 
     private Button b1, b2, b3, b4, b5, b6;
@@ -70,14 +60,11 @@ public class KioskActivity extends Activity implements Observer {
 
     private int cptPwd, clicks = 0;
 
-    private Timer timerLock, timerNav;
-
     private SharedPreferences prefs;
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
-
-    private boolean enableCaching = false;
+    private KioskWebViewClient webViewClient;
 
     @Override
     public void onBackPressed() {
@@ -112,57 +99,8 @@ public class KioskActivity extends Activity implements Observer {
         webView = findViewById(R.id.webview);
         face_counter_view = findViewById(R.id.face_counter);
 
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(final WebView view, String url) {
-                super.onPageFinished(view, url);
-                TimerTask lock = new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                Toast.makeText(context, "Kioskmode locked", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        locked = true;
-                    }
-                };
-
-                timerLock = new Timer(true);
-                timerLock.schedule(lock, 5000);
-            }
-
-            @Nullable
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                System.out.println("Test: " + request.getUrl().toString());
-
-                if (enableCaching) {
-                    if (request.getUrl().toString().contains(".mp4") || request.getUrl().toString().contains(".wav")) {
-                        String[] url_parts = request.getUrl().toString().split("/");
-                        String file_name = url_parts[url_parts.length - 1];
-
-                        if (SaveAndLoad.readFromFile(file_name, KioskActivity.this).equals("")) {
-                            URLRequest.startDownload(request.getUrl().toString(), file_name);
-                        }
-                        return new WebResourceResponse(SaveAndLoad.getMimeType(request.getUrl().toString()), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, KioskActivity.this));
-
-                    }
-                }
-                return super.shouldInterceptRequest(view, request);
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
-            }
-
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.proceed(); //Ignore SSL certificate error
-            }
-        });
+        webViewClient = new KioskWebViewClient(this);
+        webView.setWebViewClient(webViewClient);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setAppCacheEnabled(true);
@@ -180,7 +118,7 @@ public class KioskActivity extends Activity implements Observer {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 System.out.println("Touch " + clicks);
 
-                if (!dialogPrompted && locked) {
+                if (!dialogPrompted && webViewClient.isLocked()) {
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {
@@ -472,4 +410,5 @@ public class KioskActivity extends Activity implements Observer {
             face_counter_view.setText("Current faces: " + faces.length);
         }
     }
+
 }
