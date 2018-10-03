@@ -39,6 +39,7 @@ import com.coderbunker.kioskapp.lib.URLRequest;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,18 +90,11 @@ public class KioskActivity extends Activity implements Observer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Remove title bar
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        //Remove notification bar
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        removeTitleBar();
+        doNotLockScreen();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.activity_kiosk);
-
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         prefs = this.getSharedPreferences(
                 "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
@@ -115,9 +109,9 @@ public class KioskActivity extends Activity implements Observer {
             finish();
         }
 
-        //Get the webView and load the URL
         webView = findViewById(R.id.webview);
         face_counter_view = findViewById(R.id.face_counter);
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(final WebView view, String url) {
@@ -160,11 +154,8 @@ public class KioskActivity extends Activity implements Observer {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.contains(url)) {
-                    view.loadUrl(url);
-                }
+                view.loadUrl(url);
                 return true;
-
             }
 
             @Override
@@ -179,40 +170,15 @@ public class KioskActivity extends Activity implements Observer {
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.loadUrl(url);
+        hideSystemUI(webView);
 
         Toast.makeText(this, "Loading " + url, Toast.LENGTH_SHORT).show();
 
-        //Touch events for password
-        webView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideSystemUI();
-
-                System.out.println("Touch" + clicks);
-
-                if (!dialogPrompted && locked) {
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            clicks = 0;
-                        }
-                    }, 2000);
-                    clicks++;
-                    System.out.println(clicks);
-                    if (clicks >= 4) {
-                        askPassword();
-                        clicks = 0;
-                    }
-                }
-            }
-        });
         webView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                hideSystemUI();
-
-                System.out.println("Touch" + clicks);
+                System.out.println("Touch " + clicks);
 
                 if (!dialogPrompted && locked) {
                     new Timer().schedule(new TimerTask() {
@@ -276,25 +242,20 @@ public class KioskActivity extends Activity implements Observer {
         }
     }
 
-
-    // This snippet hides the system bars.
-    private void hideSystemUI() {
-
-        // Set the IMMERSIVE flag.
-        // Set the content to appear under the system bars so that the content
-        // doesn't resize when the system bars hide and show.
-        webView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+    private void doNotLockScreen() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
     }
 
-    // This snippet hides the system bars.
-    private void hideNavBar(View view) {
+    private void removeTitleBar() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+    }
 
+
+    // This snippet hides the system bars.
+    private void hideSystemUI(View view) {
         // Set the IMMERSIVE flag.
         // Set the content to appear under the system bars so that the content
         // doesn't resize when the system bars hide and show.
@@ -311,11 +272,7 @@ public class KioskActivity extends Activity implements Observer {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            hideSystemUI();
-        } else {
-            hideSystemUI();
-        }
+        hideSystemUI(webView);
     }
 
     public void enterNumber(String number) {
@@ -419,7 +376,7 @@ public class KioskActivity extends Activity implements Observer {
 
         dialog = new Dialog(webView.getContext());
         View v = dialog.getWindow().getDecorView();
-        hideNavBar(v);
+        hideSystemUI(v);
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override

@@ -57,16 +57,12 @@ public class SettingsActivity extends Activity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean changed = false;
                 String url = editURL.getText().toString();
 
-                if (url != "" && URLUtil.isValidUrl(url)) {
+                if (!url.isEmpty() && URLUtil.isValidUrl(url)) {
                     prefs.edit().putString("url", url).apply();
-                    changed = true;
-                }
-
-                if (changed)
                     Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
+                }
             }
         });
 
