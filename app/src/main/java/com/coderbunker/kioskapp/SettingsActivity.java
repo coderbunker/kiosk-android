@@ -62,6 +62,8 @@ public class SettingsActivity extends Activity {
                 if (!url.isEmpty() && URLUtil.isValidUrl(url)) {
                     prefs.edit().putString("url", url).apply();
                     Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, "Invalid URL!", LENGTH_LONG).show();
                 }
             }
         });
