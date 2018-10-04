@@ -423,7 +423,9 @@ public class KioskActivity extends Activity implements Observer {
 
     @Override
     protected void onDestroy() {
-        autoWebViewReloader.deregister(this);
+        if (autoWebViewReloader != null) {
+            autoWebViewReloader.deregister(this);
+        }
         super.onDestroy();
     }
 }
