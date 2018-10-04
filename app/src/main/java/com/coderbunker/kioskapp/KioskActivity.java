@@ -259,6 +259,7 @@ public class KioskActivity extends Activity implements Observer {
             autoWebViewReloader.deregister(this);
         }
         statusBarLocker.release();
+        passwordDialog.dismiss();
         super.onDestroy();
     }
 }
