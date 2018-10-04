@@ -107,6 +107,8 @@ public class SettingsActivity extends Activity {
 
         generateQRCodeTOTP(otp_uri);
         generateQRCodeHOTP(hotp_uri);
+
+        StatusBarLocker.askPermission(this);
     }
 
     private void generateQRCodeTOTP(String uri) {

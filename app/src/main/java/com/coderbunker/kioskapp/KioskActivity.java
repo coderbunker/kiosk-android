@@ -66,6 +66,7 @@ public class KioskActivity extends Activity implements Observer {
     private CameraPreview mCameraPreview;
     private KioskWebViewClient webViewClient;
     private AutoWebViewReloader autoWebViewReloader;
+    private StatusBarLocker statusBarLocker;
 
     @Override
     public void onBackPressed() {
@@ -81,6 +82,9 @@ public class KioskActivity extends Activity implements Observer {
         removeTitleBar();
         doNotLockScreen();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        statusBarLocker = new StatusBarLocker(this);
+        statusBarLocker.lock();
 
         setContentView(R.layout.activity_kiosk);
 
@@ -272,7 +276,6 @@ public class KioskActivity extends Activity implements Observer {
             String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
             String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
-
             //HOTP
             for (int i = 0; i < 10; i++) {
                 if (pwd.equals(HOTP.generateHOTP(hotp_counter - 5 + i, otp))) {
@@ -426,6 +429,7 @@ public class KioskActivity extends Activity implements Observer {
         if (autoWebViewReloader != null) {
             autoWebViewReloader.deregister(this);
         }
+        statusBarLocker.release();
         super.onDestroy();
     }
 }
