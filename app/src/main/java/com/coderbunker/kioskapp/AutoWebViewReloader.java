@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -29,7 +30,13 @@ public class AutoWebViewReloader extends BroadcastReceiver {
             noInternetConnectionPopup.dismiss();
         } else {
             noInternetConnectionPopup.show();
+            turnOnWifi(context);
         }
+    }
+
+    private void turnOnWifi(Context context) {
+        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
     }
 
     public boolean isConnected(Context context) {
