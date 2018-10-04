@@ -7,13 +7,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,6 +65,7 @@ public class KioskActivity extends Activity implements Observer {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private KioskWebViewClient webViewClient;
+    private AutoWebViewReloader autoWebViewReloader;
 
     @Override
     public void onBackPressed() {
@@ -117,7 +116,7 @@ public class KioskActivity extends Activity implements Observer {
         webView.post(new Runnable() {
             @Override
             public void run() {
-                AutoWebViewReloader autoWebViewReloader = new AutoWebViewReloader(webView);
+                autoWebViewReloader = new AutoWebViewReloader(webView);
                 autoWebViewReloader.register(KioskActivity.this);
             }
         });
@@ -422,4 +421,9 @@ public class KioskActivity extends Activity implements Observer {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        autoWebViewReloader.deregister(this);
+        super.onDestroy();
+    }
 }

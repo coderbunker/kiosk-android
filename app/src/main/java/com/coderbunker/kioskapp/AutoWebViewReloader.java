@@ -7,11 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 public class AutoWebViewReloader extends BroadcastReceiver {
@@ -50,5 +46,9 @@ public class AutoWebViewReloader extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         activity.registerReceiver(this, filter);
+    }
+
+    public void deregister(Activity activity) {
+        activity.unregisterReceiver(this);
     }
 }
