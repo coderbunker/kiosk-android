@@ -37,7 +37,8 @@ public class ViewerObserver implements Observer {
                     webViewVideoReader.runWithCurrentTime(new WebViewVideoReader.VideoProgressObserver() {
                         @Override
                         public void onProgressRead(WebViewVideoReader.VideoInfo video) {
-                            dbc.addViewer(faceCounter, video);
+                            Viewer viewer = new Viewer(String.valueOf(video.getCurrentTime()), "TestWert", video.getVideoSrc(), faceCounter);
+                            dbc.addViewer(viewer);
                         }
                     });
                     sameFace = true;

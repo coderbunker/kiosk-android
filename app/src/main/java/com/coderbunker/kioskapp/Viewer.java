@@ -7,7 +7,7 @@ public class Viewer {
     private String videoUrl;
 
     public Viewer() {
-        //Default constructor
+        //Default constructor for Firebase
     }
 
     public Viewer(String startTime, String endTime, String videoUrl, int faceCounter) {
