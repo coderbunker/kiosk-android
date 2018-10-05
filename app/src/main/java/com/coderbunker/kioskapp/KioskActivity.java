@@ -28,15 +28,13 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 
 
-public class KioskActivity extends Activity implements Observer {
+public class KioskActivity extends Activity  {
 
     private final Context context = this;
     private WebView webView;
-    private TextView face_counter_view;
+    private TextView faceCounterView;
     private static String url = "";
 
     private Dialog passwordDialog;
@@ -83,7 +81,7 @@ public class KioskActivity extends Activity implements Observer {
         }
 
         webView = findViewById(R.id.webview);
-        face_counter_view = findViewById(R.id.face_counter);
+        faceCounterView = findViewById(R.id.face_counter);
 
         webViewClient = new KioskWebViewClient(this);
         webView.setWebViewClient(webViewClient);
@@ -119,7 +117,7 @@ public class KioskActivity extends Activity implements Observer {
                     mCamera = getCameraInstance();
                     if (mCamera != null) {
                         FaceDetectionListener faceDetectionListener = new FaceDetectionListener();
-                        faceDetectionListener.addObserver(KioskActivity.this);
+                        faceDetectionListener.addObserver(new ViewerObserver(faceCounterView,webView));
                         mCamera.setFaceDetectionListener(faceDetectionListener);
 
                         mCameraPreview = new CameraPreview(context, mCamera);
@@ -245,13 +243,6 @@ public class KioskActivity extends Activity implements Observer {
         super.onPause();
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        if (o instanceof FaceDetectionListener) {
-            Camera.Face[] faces = ((Camera.Face[]) arg);
-            face_counter_view.setText("Current faces: " + faces.length);
-        }
-    }
 
     @Override
     protected void onDestroy() {
