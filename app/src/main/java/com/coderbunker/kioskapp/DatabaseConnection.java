@@ -14,7 +14,7 @@ public class DatabaseConnection {
 
     public void addViewer(int faceCounter) {
         String id = databaseRef.push().getKey();
-        Viewer viewer = new Viewer("TestWert", "TestWert", faceCounter);
+        Viewer viewer = new Viewer("TestWert", "TestWert","TestURL", faceCounter);
         databaseRef.child(id).setValue(viewer);
     }
 }

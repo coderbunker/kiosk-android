@@ -15,7 +15,7 @@ public class ViewerObserver implements Observer {
     private TextView faceCounterView;
     private WebView webView;
     private Camera.Face lastFace;
-    private boolean sameFace=false;
+    private boolean sameFace = false;
 
 
     public ViewerObserver(TextView faceCounterView, WebView webView) {
@@ -34,11 +34,11 @@ public class ViewerObserver implements Observer {
                 if (!sameFace) {
                     dbc.addViewer(faceCounter);
                     sameFace = true;
-                }else{
-                    sameFace=true;
+                } else {
+                    sameFace = true;
                 }
-            }else {
-                sameFace=false;
+            } else {
+                sameFace = false;
             }
 
         }
