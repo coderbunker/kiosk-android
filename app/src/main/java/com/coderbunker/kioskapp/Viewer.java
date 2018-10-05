@@ -1,10 +1,8 @@
 package com.coderbunker.kioskapp;
 
-import java.net.URL;
-
 public class Viewer {
-    private String startDate;
-    private String endDate;
+    private String startTime;
+    private String endTime;
     private int faceCounter;
     private String videoUrl;
 
@@ -12,15 +10,15 @@ public class Viewer {
         //Default constructor
     }
 
-    public Viewer(String startDate, String endDate,String videoUrl, int faceCounter) {
-        this.startDate = startDate;
-        this.endDate = endDate;
+    public Viewer(String startTime, String endTime, String videoUrl, int faceCounter) {
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.faceCounter = faceCounter;
         this.videoUrl = videoUrl;
     }
 
-    public String getStartDate() {
-        return startDate;
+    public String getStartTime() {
+        return startTime;
     }
 
     public String getVideoUrl() {
@@ -31,20 +29,20 @@ public class Viewer {
         this.videoUrl = videoUrl;
     }
 
-    public String getEndDate() {
-        return endDate;
+    public String getEndTime() {
+        return endTime;
     }
 
     public int getFaceCounter() {
         return faceCounter;
     }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public void setFaceCounter(int faceCounter) {
