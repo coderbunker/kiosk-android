@@ -11,7 +11,7 @@ public class WebViewVideoReader {
 
     private String script = "" +
             "var video = document.getElementById(\"" + videoId + "\");" +
-            "video.currentTime + \";\" + video.duration + \";\" + video.currentSrc;";
+            "video.currentTime + \";\" + video.duration + \";\" + window.location;";
 
     public WebViewVideoReader(WebView webView) {
         this.webView = webView;
