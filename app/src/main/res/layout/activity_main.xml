@@ -44,8 +44,22 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFF">
 
-
+        <Button
+            android:id="@+id/button_statistics"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:background="#fff"
+            android:elevation="4dp"
+            android:text="Statistics"
+            android:textColor="#000" />
+    </RelativeLayout>
 
 
 </LinearLayout>

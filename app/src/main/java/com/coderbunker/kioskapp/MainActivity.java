@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-    private Button kioskmode, settings;
+    private Button kioskmode, settings, statistics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
 
         kioskmode = findViewById(R.id.button_kioskmode);
         settings = findViewById(R.id.button_settings);
+        statistics = findViewById(R.id.button_statistics);
 
         kioskmode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,6 +38,16 @@ public class MainActivity extends Activity {
 
             }
         });
+        statistics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
 
     }
 }
