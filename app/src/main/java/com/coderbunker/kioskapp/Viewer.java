@@ -1,23 +1,16 @@
 package com.coderbunker.kioskapp;
 
 public class Viewer {
-    private String startTime;
-    private String endTime;
-    private int faceCounter;
+    private double startTime;
+    private double endTime;
     private String videoUrl;
 
     public Viewer() {
         //Default constructor for Firebase
     }
 
-    public Viewer(String startTime, String endTime, String videoUrl, int faceCounter) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.faceCounter = faceCounter;
-        this.videoUrl = videoUrl;
-    }
 
-    public String getStartTime() {
+    public double getStartTime() {
         return startTime;
     }
 
@@ -29,24 +22,18 @@ public class Viewer {
         this.videoUrl = videoUrl;
     }
 
-    public String getEndTime() {
+    public double getEndTime() {
         return endTime;
     }
 
-    public int getFaceCounter() {
-        return faceCounter;
-    }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(double startTime) {
         this.startTime = startTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(double endTime) {
         this.endTime = endTime;
     }
 
-    public void setFaceCounter(int faceCounter) {
-        this.faceCounter = faceCounter;
-    }
 
 }

@@ -6,22 +6,21 @@ import android.widget.TextView;
 
 import com.coderbunker.kioskapp.facerecognition.FaceDetectionListener;
 
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Queue;
 
 public class ViewerObserver implements Observer {
 
     private DatabaseConnection dbc = new DatabaseConnection();
     private TextView faceCounterView;
-    private WebView webView;
-    private Camera.Face lastFace;
-    private boolean sameFace = false;
     private WebViewVideoReader webViewVideoReader;
-
+    private Queue<Viewer> viewers = new LinkedList<>();
+    private int currentFaceCounter;
 
     public ViewerObserver(TextView faceCounterView, WebView webView) {
         this.faceCounterView = faceCounterView;
-        this.webView = webView;
         webViewVideoReader = new WebViewVideoReader(webView);
     }
 
@@ -32,24 +31,37 @@ public class ViewerObserver implements Observer {
             final int faceCounter = faces.length;
             faceCounterView.setText("Current faces: " + faceCounter);
 
-            if (faceCounter > 0) {
-                if (!sameFace) {
+                if (faceCounter > currentFaceCounter) {
                     webViewVideoReader.runWithCurrentTime(new WebViewVideoReader.VideoProgressObserver() {
                         @Override
                         public void onProgressRead(WebViewVideoReader.VideoInfo video) {
-                            Viewer viewer = new Viewer(String.valueOf(video.getCurrentTime()), "TestWert", video.getVideoSrc(), faceCounter);
-                            dbc.addViewer(viewer);
+                            Viewer viewer = new Viewer();
+                            viewer.setStartTime(video.getCurrentTime());
+                            viewer.setVideoUrl(video.getVideoSrc());
+                            viewers.add(viewer);
+
                         }
                     });
-                    sameFace = true;
-                } else {
-                    sameFace = true;
+                    currentFaceCounter = faceCounter;
+                } else if (faceCounter < currentFaceCounter) {
+                    webViewVideoReader.runWithCurrentTime(new WebViewVideoReader.VideoProgressObserver() {
+                        @Override
+                        public void onProgressRead(WebViewVideoReader.VideoInfo video) {
+                            Viewer viewer = viewers.element();
+                            viewer.setEndTime(video.getCurrentTime());
+                            if (viewer.getStartTime() + 5 <= viewer.getEndTime()) {
+                                dbc.addViewer(viewer);
+                            }
+                            viewers.remove(viewer);
+                            currentFaceCounter =faceCounter;
+                        }
+                    });
                 }
-            } else {
-                sameFace = false;
-            }
+
 
         }
-    }
 
+    }
 }
+
+
