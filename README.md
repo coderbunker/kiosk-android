@@ -10,6 +10,7 @@ The application covers the following features :
 - Enter kiosk mode from the application
 - Exit kiosk mode with an OTP (One-time password) from Google Authenticator.
 - Modify the URL of the website hosting the video
+- Secret touch command to open OTP pin (touch screen 4 times in the right pace)
 
 Setup
 
@@ -17,11 +18,13 @@ Setup
 2. Click on File -> New -> Project from version control -> GitHub
 3. Enter Git Repository URL : https://github.com/coderbunker/kiosk-android
 4. Click on "Clone"
-5. Build and Run !
+5. Build and Run!
+6. Allow camera and display overlay
+6. Scan OTP password
+8. Set app as home
 
-Kiosk mode 
+Config video
 
-- The default password is : 1234
-- The default URL is : https://naibaben.github.io/
-
-Both can be changed in the "settings" activity/screen
+1. Setup website with [kiosk-web](https://github.com/coderbunker/kiosk-web)
+2. Set custom video in index.html
+3. Open settings in app and enter url to website
