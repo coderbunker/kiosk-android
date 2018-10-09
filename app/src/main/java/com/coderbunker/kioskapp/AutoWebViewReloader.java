@@ -35,7 +35,7 @@ public class AutoWebViewReloader extends BroadcastReceiver {
     }
 
     private void turnOnWifi(Context context) {
-        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(true);
     }
 
@@ -44,9 +44,8 @@ public class AutoWebViewReloader extends BroadcastReceiver {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
+        return activeNetwork != null &&
                 activeNetwork.isConnected();
-        return isConnected;
     }
 
     public void register(Activity activity) {
