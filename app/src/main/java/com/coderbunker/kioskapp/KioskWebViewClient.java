@@ -18,7 +18,6 @@ import java.util.TimerTask;
 
 class KioskWebViewClient extends WebViewClient {
 
-    private boolean locked = false;
     private boolean enableCaching = false;
     private Activity activity;
 
@@ -37,7 +36,6 @@ class KioskWebViewClient extends WebViewClient {
                         Toast.makeText(view.getContext(), "Kioskmode locked", Toast.LENGTH_SHORT).show();
                     }
                 });
-                locked = true;
             }
         };
 
@@ -47,22 +45,22 @@ class KioskWebViewClient extends WebViewClient {
 
     @Nullable
     @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        System.out.println("Test: " + request.getUrl().toString());
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        System.out.println("Test: " + url);
 
         if (enableCaching) {
-            if (request.getUrl().toString().contains(".mp4") || request.getUrl().toString().contains(".wav")) {
-                String[] url_parts = request.getUrl().toString().split("/");
+            if (url.contains(".mp4") || url.contains(".wav")) {
+                String[] url_parts = url.split("/");
                 String file_name = url_parts[url_parts.length - 1];
 
                 if (SaveAndLoad.readFromFile(file_name, activity).equals("")) {
-                    URLRequest.startDownload(request.getUrl().toString(), file_name);
+                    URLRequest.startDownload(url, file_name);
                 }
-                return new WebResourceResponse(SaveAndLoad.getMimeType(request.getUrl().toString()), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, activity));
+                return new WebResourceResponse(SaveAndLoad.getMimeType(url), "UTF-8", SaveAndLoad.readFromFileAndReturnInputStream(file_name, activity));
 
             }
         }
-        return super.shouldInterceptRequest(view, request);
+        return super.shouldInterceptRequest(view, url);
     }
 
     @Override
@@ -75,9 +73,4 @@ class KioskWebViewClient extends WebViewClient {
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
         handler.proceed(); //Ignore SSL certificate error
     }
-
-    public boolean isLocked() {
-        return locked;
-    }
-
 }
