@@ -123,9 +123,19 @@ public class PasswordDialog extends Dialog {
         if (cptPwd == 5) {
             cptPwd = 0;
             checkPwd();
+            clearPwd();
         } else
             cptPwd++;
 
+    }
+
+    private void clearPwd() {
+        b1.setText("");
+        b2.setText("");
+        b3.setText("");
+        b4.setText("");
+        b5.setText("");
+        b6.setText("");
     }
 
     private void checkPwd() {

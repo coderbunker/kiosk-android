@@ -25,7 +25,11 @@ public class StatusBarLocker {
             WindowManager manager = getWindowManager();
 
             WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
-            localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                localLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY; // fix
+            } else {
+                localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+            }
             localLayoutParams.gravity = Gravity.TOP;
             localLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
@@ -53,7 +57,7 @@ public class StatusBarLocker {
     }
 
     public void release() {
-        if(view != null) {
+        if (view != null) {
             getWindowManager().removeView(view);
         }
     }
