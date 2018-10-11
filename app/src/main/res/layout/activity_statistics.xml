@@ -8,10 +8,10 @@
     android:orientation="vertical"
     tools:context=".StatisticsActivity">
 
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph"
+    <lecho.lib.hellocharts.view.LineChartView
+        android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:layout_margin="20dp"
-        android:visibility="visible" />
+        android:layout_height="match_parent"
+        android:layout_margin="30dp"
+        android:padding="10dp" />
 </RelativeLayout>
