@@ -67,11 +67,10 @@ public class KioskActivity extends Activity  {
 
         setContentView(R.layout.activity_kiosk);
 
-        prefs = this.getSharedPreferences(
-                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
+        Configuration configuration = Configuration.loadFromPreferences(context);
 
-        url = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
-        String otp = prefs.getString("otp", null);
+        url = configuration.getUrl();
+        String otp = configuration.getPassphrase();
 
         if (otp == null) {
             Intent intent = new Intent(KioskActivity.this, SettingsActivity.class);

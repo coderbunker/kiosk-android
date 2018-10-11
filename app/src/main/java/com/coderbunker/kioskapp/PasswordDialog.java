@@ -2,9 +2,7 @@ package com.coderbunker.kioskapp;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.view.KeyEvent;
 import android.view.View;
@@ -139,10 +137,9 @@ public class PasswordDialog extends Dialog {
     }
 
     private void checkPwd() {
-        SharedPreferences prefs = getContext().getSharedPreferences(
-                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
-        String otp = prefs.getString("otp", null);
-        int hotp_counter = prefs.getInt("hotp_counter", 0);
+        Configuration configuration = Configuration.loadFromPreferences(getContext());
+        String otp = configuration.getPassphrase();
+        int hotpCounter = configuration.getHotpCounter();
         if (otp == null) {
             Toast.makeText(getContext(), "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
             launchRunnable();
@@ -157,12 +154,15 @@ public class PasswordDialog extends Dialog {
             }
 
             //HOTP
-            for (int i = 0; i < 10; i++) {
-                if (pwd.equals(HOTP.generateHOTP(hotp_counter - 5 + i, otp))) {
+            for (int i = 1; i <= 50; i++) {
+                int currentHotpCounter = hotpCounter + i;
+                System.out.println("hotp: " + currentHotpCounter);
+                if (pwd.equals(HOTP.generateHOTP(currentHotpCounter, otp))) {
                     Toast.makeText(getContext(), "HOTP PIN correct", Toast.LENGTH_SHORT).show();
 
-                    hotp_counter++;
-                    prefs.edit().putInt("hotp_counter", hotp_counter).apply();
+                    hotpCounter = currentHotpCounter;
+                    System.out.println("final hotp counter: " + hotpCounter);
+                    configuration.setHotpCounter(hotpCounter);
 
                     launchRunnable();
                     return;

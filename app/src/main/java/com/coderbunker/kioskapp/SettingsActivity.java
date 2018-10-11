@@ -3,7 +3,6 @@ package com.coderbunker.kioskapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -34,8 +33,6 @@ public class SettingsActivity extends Activity {
     private TextView lblCurrentHOTPCycle;
     private Button btnSave;
 
-    private SharedPreferences prefs;
-
     private String otp_uri, hotp_uri;
 
     @Override
@@ -45,14 +42,13 @@ public class SettingsActivity extends Activity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        prefs = this.getSharedPreferences(
-                "com.coderbunker.kioskapp", Context.MODE_PRIVATE);
-
         imgQRCode = findViewById(R.id.imgQRCode);
         imgQRCodeHOTP = findViewById(R.id.imgQRCodeHOTP);
         editURL = findViewById(R.id.editText_URL);
         btnSave = findViewById(R.id.btnSave);
         lblCurrentHOTPCycle = findViewById(R.id.current_hotp_cycle);
+
+        final Configuration configuration = Configuration.loadFromPreferences(this);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +56,7 @@ public class SettingsActivity extends Activity {
                 String url = editURL.getText().toString();
 
                 if (!url.isEmpty() && URLUtil.isValidUrl(url)) {
-                    prefs.edit().putString("url", url).apply();
+                    configuration.setUrl(url);
                     Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
                 } else {
                     Toast.makeText(context, "Invalid URL!", LENGTH_LONG).show();
@@ -68,9 +64,9 @@ public class SettingsActivity extends Activity {
             }
         });
 
-        String otp = prefs.getString("otp", null);
-        String url = prefs.getString("url", "https://coderbunker.github.io/kiosk-web/");
-        int hotp_counter = prefs.getInt("hotp_counter", 0);
+        String otp = configuration.getPassphrase();
+        String url = configuration.getUrl();
+        int hotp_counter = configuration.getHotpCounter();
 
         editURL.setText(url);
 
@@ -89,17 +85,14 @@ public class SettingsActivity extends Activity {
 
             otp = Base32.encode(key);
 
-            SharedPreferences.Editor editor = prefs.edit();
-
-            editor.putString("otp", otp);
-            editor.apply();
+            configuration.setPassphrase(otp);
         }
 
-        String device = prefs.getString("uuid", null);
+        String device = configuration.getUuid();
 
         if (device == null) {
             device = UUID.randomUUID().toString();
-            prefs.edit().putString("uuid", device).apply();
+            configuration.setUuid(device);
         }
 
         otp_uri = "otpauth://totp/" + device + "%20-%20Time?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
