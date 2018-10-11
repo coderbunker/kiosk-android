@@ -20,7 +20,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class StatisticsActivity extends Activity {
-    private DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private int countViewers = 0;
 
     @Override
@@ -58,6 +57,7 @@ public class StatisticsActivity extends Activity {
 
             private void compareDayOfMonthCounterAndViewerDate(Viewer viewer, int dayOfMonthCounter) {
                 try {
+                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Date dateOfViewer = format.parse(viewer.getDateTime());
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(dateOfViewer);
