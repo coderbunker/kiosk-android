@@ -20,11 +20,15 @@ Setup
 4. Click on "Clone"
 5. Build and Run!
 6. Allow camera and display overlay
-6. Scan OTP password
-8. Set app as home
+7. Scan OTP password
+8. Deactivate Google assistant
+9. Set app as home
 
 Config video
 
 1. Setup website with [kiosk-web](https://github.com/coderbunker/kiosk-web)
 2. Set custom video in index.html
 3. Open settings in app and enter url to website
+
+Backend configuration concept
+![swimlanes](https://github.com/coderbunker/kiosk-android/blob/documentation/files/swimlanes.png)

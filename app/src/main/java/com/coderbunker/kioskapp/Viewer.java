@@ -4,11 +4,15 @@ public class Viewer {
     private double startTime;
     private double endTime;
     private String videoUrl;
+    private String dateTime;
 
     public Viewer() {
         //Default constructor for Firebase
     }
 
+    public String getDateTime() { return dateTime; }
+
+    public void setDateTime(String dateTime) { this.dateTime = dateTime; }
 
     public double getStartTime() {
         return startTime;
