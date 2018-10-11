@@ -56,7 +56,7 @@ public class ViewerObserver implements Observer {
                     public void onProgressRead(WebViewVideoReader.VideoInfo video) {
                         Viewer viewer = viewers.element();
                         viewer.setEndTime(video.getCurrentTime());
-                        if (viewer.getStartTime() + 5 <= viewer.getEndTime()) {
+                        if (viewer.getStartTime() + 3 <= viewer.getEndTime()) {
                             dbc.addViewer(viewer);
                         }
                         viewers.remove(viewer);

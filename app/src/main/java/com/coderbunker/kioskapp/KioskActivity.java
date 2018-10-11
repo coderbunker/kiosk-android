@@ -39,8 +39,6 @@ public class KioskActivity extends Activity  {
 
     private Dialog passwordDialog;
 
-    private SharedPreferences prefs;
-
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private KioskWebViewClient webViewClient;
