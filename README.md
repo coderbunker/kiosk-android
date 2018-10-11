@@ -28,3 +28,6 @@ Config video
 1. Setup website with [kiosk-web](https://github.com/coderbunker/kiosk-web)
 2. Set custom video in index.html
 3. Open settings in app and enter url to website
+
+Backend configuration concept
+![swimlanes](https://github.com/coderbunker/kiosk-android/blob/documentation/files/swimlanes.png)
