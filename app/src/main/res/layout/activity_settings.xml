@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#FFF"
     android:orientation="vertical"
-    tools:context=".SettingsActivity">
+    tools:context=".config.SettingsActivity">
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -92,6 +92,12 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <Button
+                android:id="@+id/claimTabletBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Claim Tablet" />
 
             <TextView
                 android:id="@+id/textView_URL"

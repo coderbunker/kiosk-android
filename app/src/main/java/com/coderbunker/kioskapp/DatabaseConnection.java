@@ -1,7 +1,11 @@
 package com.coderbunker.kioskapp;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.coderbunker.kioskapp.config.ConfigEncrypter;
+import com.coderbunker.kioskapp.config.Configuration;
+import com.coderbunker.kioskapp.config.encryption.EncryptionException;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -12,20 +16,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseConnection {
-    private DatabaseReference databaseRef;
+    private FirebaseDatabase database;
 
 
     public DatabaseConnection() {
-        databaseRef = FirebaseDatabase.getInstance().getReference("faceDetections");
+        database = FirebaseDatabase.getInstance();
     }
 
     public void addViewer(Viewer viewer) {
-        String id = databaseRef.push().getKey();
-        databaseRef.child(id).setValue(viewer);
+        DatabaseReference reference = getFaceDetectionReference();
+        String id = reference.push().getKey();
+        reference.child(id).setValue(viewer);
+    }
+
+    @NonNull
+    private DatabaseReference getFaceDetectionReference() {
+        return database.getReference("faceDetections");
     }
 
     public void readViewer(final OnViewersReceived onViewersReceived) {
-        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference reference = getFaceDetectionReference();
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final List<Viewer> viewers = new ArrayList<>();
@@ -43,7 +54,71 @@ public class DatabaseConnection {
         });
     }
 
-    interface OnViewersReceived {
+    public void saveConfiguration(Configuration configuration) throws EncryptionException {
+        DatabaseReference configurationReferences = getConfigurationReferences();
+        DatabaseReference configChild = configurationReferences.child(configuration.getUuid()).child("configuration");
+        String encryptedConfiguration = encryptConfiguration(configuration);
+        configChild.setValue(encryptedConfiguration);
+    }
+
+    private String encryptConfiguration(Configuration configuration) throws EncryptionException {
+        return new ConfigEncrypter().encrypt(configuration.getPassphrase(), configuration);
+    }
+
+    public interface OnViewersReceived {
         void onViewersReceived(List<Viewer> viewers);
+    }
+
+    public void getConfiguration(final String passphrase, String uuid, final Context context, final OnConfigChanged onConfigChanged) {
+        DatabaseReference configurationReference = getConfigurationReferences();
+        DatabaseReference device = configurationReference.child(uuid);
+        device.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String value = dataSnapshot.child("configuration").getValue(String.class);
+                Configuration configuration = null;
+                try {
+                    configuration = decryptConfiguration(passphrase, value, context);
+                    if (configuration == null) {
+                        configuration = replaceConfigWithLocal(context);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    configuration = replaceConfigWithLocal(context);
+                } finally {
+                    onConfigChanged.OnConfigChanged(configuration);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @NonNull
+    private Configuration replaceConfigWithLocal(Context context) {
+        Configuration configuration = Configuration.loadFromPreferences(context);
+        try {
+            saveConfiguration(configuration);
+        } catch (EncryptionException e1) {
+            e1.printStackTrace();
+            //do nothing
+        }
+        return configuration;
+    }
+
+    public interface OnConfigChanged {
+        void OnConfigChanged(Configuration configuration);
+
+    }
+
+    private Configuration decryptConfiguration(String passphrase, String value, Context context) throws EncryptionException {
+        return new ConfigEncrypter().decrypt(passphrase, value, context);
+    }
+
+    private DatabaseReference getConfigurationReferences() {
+        return database.getReference("configurations");
     }
 }

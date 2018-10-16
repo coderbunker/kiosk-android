@@ -1,6 +1,8 @@
-package com.coderbunker.kioskapp;
+package com.coderbunker.kioskapp.config.encryption;
 
 import android.util.Base64;
+
+import com.coderbunker.kioskapp.lib.Base32;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -33,30 +35,27 @@ public class AesUtil {
         this.iterationCount = iterationCount;
         try {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        }
-        catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw fail(e);
         }
     }
 
-    public String encrypt(String salt, String iv, String passphrase, String plaintext) {
+    public String encrypt(String iv, String hexKey, String plaintext) throws Base32.DecodingException {
         try {
-            SecretKey key = generateKey(salt, passphrase);
+            SecretKey key = generateKey(hexKey);
             byte[] encrypted = doFinal(Cipher.ENCRYPT_MODE, key, iv, plaintext.getBytes("UTF-8"));
             return base64(encrypted);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw fail(e);
         }
     }
 
-    public String decrypt(String salt, String iv, String passphrase, String ciphertext) {
+    public String decrypt(String iv, String hexKey, String ciphertext) throws Base32.DecodingException {
         try {
-            SecretKey key = generateKey(salt, passphrase);
+            SecretKey key = generateKey(hexKey);
             byte[] decrypted = doFinal(Cipher.DECRYPT_MODE, key, iv, base64(ciphertext));
             return new String(decrypted, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw fail(e);
         }
     }
@@ -65,8 +64,7 @@ public class AesUtil {
         try {
             cipher.init(encryptMode, key, new IvParameterSpec(hex(iv)));
             return cipher.doFinal(bytes);
-        }
-        catch (InvalidKeyException
+        } catch (InvalidKeyException
                 | InvalidAlgorithmParameterException
                 | IllegalBlockSizeException
                 | BadPaddingException e) {
@@ -74,14 +72,17 @@ public class AesUtil {
         }
     }
 
-    private SecretKey generateKey(String salt, String passphrase) {
+    private SecretKey generateKey(String key) throws Base32.DecodingException {
+        return new SecretKeySpec(Base32.decode(key), "AES");
+    }
+
+    public byte[] hashPassphrase(String passphrase, String salt) {
+        SecretKeyFactory factory = null;
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             KeySpec spec = new PBEKeySpec(passphrase.toCharArray(), hex(salt), iterationCount, keySize);
-            SecretKey key = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-            return key;
-        }
-        catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+           return factory.generateSecret(spec).getEncoded();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw fail(e);
         }
     }
@@ -93,7 +94,7 @@ public class AesUtil {
     }
 
     public static String base64(byte[] bytes) {
-        return Base64.encodeToString(bytes, Base64.DEFAULT);
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
 
     public static byte[] base64(String str) {
@@ -101,14 +102,13 @@ public class AesUtil {
     }
 
     public static String hex(byte[] bytes) {
-        return Hex.encodeHexString(bytes);
+        return new String(Hex.encodeHex(bytes));
     }
 
     public static byte[] hex(String str) {
         try {
             return Hex.decodeHex(str.toCharArray());
-        }
-        catch (DecoderException e) {
+        } catch (DecoderException e) {
             throw new IllegalStateException(e);
         }
     }
