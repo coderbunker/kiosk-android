@@ -2,10 +2,11 @@ package com.coderbunker.kioskapp;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import com.coderbunker.kioskapp.config.SettingsActivity;
 
 public class MainActivity extends Activity {
 

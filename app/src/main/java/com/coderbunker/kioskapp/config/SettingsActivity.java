@@ -1,4 +1,4 @@
-package com.coderbunker.kioskapp;
+package com.coderbunker.kioskapp.config;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,13 +15,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.coderbunker.kioskapp.lib.Base32;
+import com.coderbunker.kioskapp.DatabaseConnection;
+import com.coderbunker.kioskapp.config.encryption.EncryptionException;
+import com.coderbunker.kioskapp.MainActivity;
+import com.coderbunker.kioskapp.R;
+import com.coderbunker.kioskapp.StatusBarLocker;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-
-import java.util.UUID;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -34,6 +36,8 @@ public class SettingsActivity extends Activity {
     private Button btnSave;
 
     private String otp_uri, hotp_uri;
+
+    private Configuration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,58 +52,67 @@ public class SettingsActivity extends Activity {
         btnSave = findViewById(R.id.btnSave);
         lblCurrentHOTPCycle = findViewById(R.id.current_hotp_cycle);
 
-        final Configuration configuration = Configuration.loadFromPreferences(this);
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
+        Button claimTabletBtn = findViewById(R.id.claimTabletBtn);
+        claimTabletBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = editURL.getText().toString();
-
-                if (!url.isEmpty() && URLUtil.isValidUrl(url)) {
-                    configuration.setUrl(url);
-                    Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(context, "Invalid URL!", LENGTH_LONG).show();
-                }
+                new ClaimDialog(SettingsActivity.this).show();
             }
         });
 
-        String otp = configuration.getPassphrase();
-        String url = configuration.getUrl();
-        int hotp_counter = configuration.getHotpCounter();
+        Configuration.loadFromServer(this, new DatabaseConnection.OnConfigChanged() {
+            @Override
+            public void OnConfigChanged(final Configuration configuration) {
+                SettingsActivity.this.configuration = configuration;
+                btnSave.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String url = editURL.getText().toString();
 
-        editURL.setText(url);
+                        if (!url.isEmpty() && URLUtil.isValidUrl(url)) {
+                            configuration.setUrl(url);
+                            Toast.makeText(context, "Changes saved!", LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Invalid URL!", LENGTH_LONG).show();
+                        }
+                    }
+                });
 
-        lblCurrentHOTPCycle.setText("Current counter cycle: " + hotp_counter);
+                String otp = configuration.getPassphrase();
+                String url = configuration.getUrl();
+                int hotp_counter = configuration.getHotpCounter();
 
-        if (otp == null) {
+                editURL.setText(url);
 
-            byte key_1 = (byte) Math.floor(Math.random() * 10);
-            byte key_2 = (byte) Math.floor(Math.random() * 10);
-            byte key_3 = (byte) Math.floor(Math.random() * 10);
-            byte key_4 = (byte) Math.floor(Math.random() * 10);
-            byte key_5 = (byte) Math.floor(Math.random() * 10);
-            byte key_6 = (byte) Math.floor(Math.random() * 10);
+                lblCurrentHOTPCycle.setText("Current counter cycle: " + hotp_counter);
 
-            byte[] key = {key_1, key_2, key_3, key_4, key_5, key_6, (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF};
+                if (otp == null) {
 
-            otp = Base32.encode(key);
+                    byte key_1 = (byte) Math.floor(Math.random() * 10);
+                    byte key_2 = (byte) Math.floor(Math.random() * 10);
+                    byte key_3 = (byte) Math.floor(Math.random() * 10);
+                    byte key_4 = (byte) Math.floor(Math.random() * 10);
+                    byte key_5 = (byte) Math.floor(Math.random() * 10);
+                    byte key_6 = (byte) Math.floor(Math.random() * 10);
 
-            configuration.setPassphrase(otp);
-        }
+                    byte[] key = {key_1, key_2, key_3, key_4, key_5, key_6, (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF};
 
-        String device = configuration.getUuid();
+                    otp = new ConfigEncrypter().hashPassphrase(new String(key));
 
-        if (device == null) {
-            device = UUID.randomUUID().toString();
-            configuration.setUuid(device);
-        }
+                    configuration.setPassphrase(otp);
+                }
 
-        otp_uri = "otpauth://totp/" + device + "%20-%20Time?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
-        hotp_uri = "otpauth://hotp/" + device + "%20-%20Counter?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
+                String device = configuration.getUuid();
 
-        generateQRCodeTOTP(otp_uri);
-        generateQRCodeHOTP(hotp_uri);
+                otp_uri = "otpauth://totp/" + device + "%20-%20Time?secret=" + otp + "&issuer=Kiosk%20Coderbunker";
+                hotp_uri = "otpauth://hotp/" + device + "%20-%20Counter?secret=" + otp + "&issuer=Kiosk%20Coderbunker&counter=" + (hotp_counter - 1) + "&algorithm=SHA1";
+
+                generateQRCodeTOTP(otp_uri);
+                generateQRCodeHOTP(hotp_uri);
+
+            }
+        });
+
 
         StatusBarLocker.askPermission(this);
     }
@@ -146,6 +159,14 @@ public class SettingsActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                try {
+                    if(configuration != null) {
+                        configuration.save();
+                    }
+                } catch (EncryptionException e) {
+                    e.printStackTrace();
+                    Toast.makeText(context, "Saving changes to server failed!", LENGTH_LONG).show();
+                }
                 Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();

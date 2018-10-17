@@ -11,7 +11,7 @@ public class WebViewVideoReader {
 
     private String script = "" +
             "var video = document.getElementById(\"" + videoId + "\");" +
-            "video.currentTime + \";\" + video.duration + \";\" + window.location;";
+            "if(video === undefined || video === null) {0 + \";\" + 0 + \";\" + window.location;}else{video.currentTime + \";\" + video.duration + \";\" + window.location;}";
 
     public WebViewVideoReader(WebView webView) {
         this.webView = webView;
@@ -21,6 +21,7 @@ public class WebViewVideoReader {
         webView.evaluateJavascript(script, new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String value) {
+                System.out.println(value);
                 String[] strings = splitValues(value);
                 observer.onProgressRead(new VideoInfo(Double.parseDouble(strings[0]), Double.parseDouble(strings[1]), strings[2]));
             }

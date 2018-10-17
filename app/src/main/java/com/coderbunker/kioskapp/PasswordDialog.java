@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.coderbunker.kioskapp.config.Configuration;
+import com.coderbunker.kioskapp.config.encryption.EncryptionException;
 import com.coderbunker.kioskapp.lib.HOTP;
 import com.coderbunker.kioskapp.lib.TOTP;
 
@@ -145,6 +147,7 @@ public class PasswordDialog extends Dialog {
             launchRunnable();
         } else {
             String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
+            System.out.println(otp);
             String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
             String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
@@ -164,6 +167,12 @@ public class PasswordDialog extends Dialog {
                     System.out.println("final hotp counter: " + hotpCounter);
                     configuration.setHotpCounter(hotpCounter);
 
+                    try {
+                        configuration.save();
+                    } catch (EncryptionException e) {
+                        e.printStackTrace();
+                        //do nothing
+                    }
                     launchRunnable();
                     return;
                 }

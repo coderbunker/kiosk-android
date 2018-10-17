@@ -12,7 +12,7 @@ The application covers the following features :
 - Modify the URL of the website hosting the video
 - Secret touch command to open OTP pin (touch screen 4 times in the right pace)
 
-Setup
+Setup:
 
 1. Open Android Studio
 2. Click on File -> New -> Project from version control -> GitHub
@@ -22,9 +22,10 @@ Setup
 6. Allow camera and display overlay
 7. Scan OTP password
 8. Deactivate Google assistant
-9. Set app as home
+9. Disable automatic system and software update in the settings
+10. Set app as home
 
-Config video
+Config video:
 
 1. Setup website with [kiosk-web](https://github.com/coderbunker/kiosk-web)
 2. Set custom video in index.html
