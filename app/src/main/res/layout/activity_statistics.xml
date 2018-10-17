@@ -8,10 +8,74 @@
     android:orientation="vertical"
     tools:context=".StatisticsActivity">
 
-    <lecho.lib.hellocharts.view.LineChartView
-        android:id="@+id/chart"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="30dp"
-        android:padding="10dp" />
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:weightSum="6">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2">
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                 />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2">
+
+            <TextView
+                android:id="@+id/columnChartStartTimeYAxes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:rotation="-90"
+                android:text="@string/viewersLabel"
+                android:textColor="#03A9F4"
+                android:textSize="15sp" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/columnChartStartTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+               />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2">
+
+            <TextView
+                android:id="@+id/columnChartEndTimeYAxes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:rotation="-90"
+                android:text="@string/viewersLabel"
+                android:textColor="#03A9F4"
+                android:textSize="15sp" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/columnChartEndTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+          >
+
+            </com.github.mikephil.charting.charts.BarChart>
+        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>
+
