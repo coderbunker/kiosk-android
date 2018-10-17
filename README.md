@@ -22,11 +22,8 @@ Setup:
 6. Allow camera and display overlay
 7. Scan OTP password
 8. Deactivate Google assistant
-9. Set app as home
-
-Setup Tablet:
-
-- Disable automatic system and software update in the settings
+9. Disable automatic system and software update in the settings
+10. Set app as home
 
 Config video:
 
