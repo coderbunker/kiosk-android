@@ -6,4 +6,5 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="noInternetConnection">No internet connection.</string>
     <string name="viewersLabel">Viewers</string>
+    <string name="secondsOfVideo">Seconds of Video</string>
 </resources>
