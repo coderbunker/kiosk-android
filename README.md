@@ -21,7 +21,7 @@ Setup:
 3. Enter Git Repository URL : https://github.com/coderbunker/kiosk-android
 4. Click on "Clone"
 5. Build and Run!
-6. Allow camera and display overlay
+6. Allow camera and display overlay (if the message facerecognition denied comes, the permissions have to be changed manualy in the settings.
 7. Scan OTP password
 8. Deactivate Google assistant
 9. Disable automatic system and software update in the settings
