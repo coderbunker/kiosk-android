@@ -18,10 +18,12 @@ public class ClaimDialog extends Dialog {
         super(context, false, null);
         setContentView(R.layout.claim_dialog);
 
+        Configuration configuration = Configuration.loadFromPreferences(context);
         final EditText passphraseView = findViewById(R.id.passphrase);
         final EditText groupLabelView = findViewById(R.id.groupLabel);
+        groupLabelView.setText(configuration.getGroupLabel());
         final EditText deviceLabelView = findViewById(R.id.deviceLabel);
-
+        deviceLabelView.setText(configuration.getDeviceLabel());
 
         Button claimBtn = findViewById(R.id.claim);
         Button cancelBtn = findViewById(R.id.cancel);
