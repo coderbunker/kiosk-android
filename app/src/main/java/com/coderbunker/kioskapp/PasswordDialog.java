@@ -138,7 +138,7 @@ public class PasswordDialog extends Dialog {
     }
 
     private void checkPwd() {
-        Configuration.onConfigChanges(getContext(), new DatabaseConnection.OnConfigChanged() {
+        Configuration.withConfigFromServer(getContext(), new DatabaseConnection.OnConfigChanged() {
             @Override
             public void OnConfigChanged(Configuration configuration) {
                 String otp = configuration.getPassphrase();
