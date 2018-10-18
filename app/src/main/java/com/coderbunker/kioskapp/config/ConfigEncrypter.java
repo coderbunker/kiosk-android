@@ -19,7 +19,6 @@ public class ConfigEncrypter {
     public String hashPassphrase(String passphrase) {
         AesUtil aesUtil = new AesUtil(keySize, iterationCount);
         String hashPassphrase = Base32.encode(aesUtil.hashPassphrase(passphrase, salt));
-        System.out.println(hashPassphrase);
         return hashPassphrase;
     }
 
@@ -37,12 +36,9 @@ public class ConfigEncrypter {
 
     public Configuration decrypt(String passphrase, String value, Context context) throws EncryptionException {
         try {
-            System.out.println(value);
-            System.out.println(passphrase);
             AesUtil aesUtil = new AesUtil(keySize, iterationCount);
             String decrypt = null;
             decrypt = aesUtil.decrypt(iv, passphrase, value);
-            System.out.println(decrypt);
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(decrypt, Configuration.ConfigurationBuilder.class).build(context);
         } catch (Base32.DecodingException | IOException e) {

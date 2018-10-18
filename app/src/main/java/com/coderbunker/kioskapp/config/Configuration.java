@@ -118,11 +118,23 @@ public class Configuration {
     }
 
 
-    public static void loadFromServer(Context context, DatabaseConnection.OnConfigChanged onConfigChanged) {
+    public static void onConfigChanges(Context context, DatabaseConnection.OnConfigChanged onConfigChanged) {
         DatabaseConnection databaseConnection = new DatabaseConnection();
         Configuration localConfig = loadFromPreferences(context);
         if (localConfig.getPassphrase() != null) {
-            databaseConnection.getConfiguration(localConfig.getPassphrase(), localConfig.getUuid(), context, onConfigChanged);
+            boolean callOnce = false;
+            databaseConnection.getConfiguration(localConfig.getPassphrase(), localConfig.getUuid(), context, onConfigChanged, callOnce);
+        } else {
+            onConfigChanged.OnConfigChanged(localConfig);
+        }
+    }
+
+    public static void withConfigFromServer(Context context, DatabaseConnection.OnConfigChanged onConfigChanged) {
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+        Configuration localConfig = loadFromPreferences(context);
+        if (localConfig.getPassphrase() != null) {
+            boolean callOnce = true;
+            databaseConnection.getConfiguration(localConfig.getPassphrase(), localConfig.getUuid(), context, onConfigChanged, callOnce);
         } else {
             onConfigChanged.OnConfigChanged(localConfig);
         }

@@ -56,9 +56,13 @@ public class DatabaseConnection {
 
     public void saveConfiguration(Configuration configuration) throws EncryptionException {
         DatabaseReference configurationReferences = getConfigurationReferences();
-        DatabaseReference configChild = configurationReferences.child(configuration.getUuid()).child("configuration");
+        DatabaseReference device = configurationReferences.child(configuration.getUuid());
+        DatabaseReference configChild = device.child("configuration");
         String encryptedConfiguration = encryptConfiguration(configuration);
         configChild.setValue(encryptedConfiguration);
+
+        device.child("groupLabel").setValue(configuration.getGroupLabel());
+        device.child("deviceLabel").setValue(configuration.getDeviceLabel());
     }
 
     private String encryptConfiguration(Configuration configuration) throws EncryptionException {
@@ -69,32 +73,14 @@ public class DatabaseConnection {
         void onViewersReceived(List<Viewer> viewers);
     }
 
-    public void getConfiguration(final String passphrase, String uuid, final Context context, final OnConfigChanged onConfigChanged) {
+    public void getConfiguration(final String passphrase, String uuid, final Context context, final OnConfigChanged onConfigChanged, boolean callOnce) {
         DatabaseReference configurationReference = getConfigurationReferences();
         DatabaseReference device = configurationReference.child(uuid);
-        device.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String value = dataSnapshot.child("configuration").getValue(String.class);
-                Configuration configuration = null;
-                try {
-                    configuration = decryptConfiguration(passphrase, value, context);
-                    if (configuration == null) {
-                        configuration = replaceConfigWithLocal(context);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    configuration = replaceConfigWithLocal(context);
-                } finally {
-                    onConfigChanged.OnConfigChanged(configuration);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        if (callOnce) {
+            device.addListenerForSingleValueEvent(new ConfigValueEventListener(passphrase, context, onConfigChanged));
+        } else {
+            device.addValueEventListener(new ConfigValueEventListener(passphrase, context, onConfigChanged));
+        }
     }
 
     @NonNull
@@ -120,5 +106,39 @@ public class DatabaseConnection {
 
     private DatabaseReference getConfigurationReferences() {
         return database.getReference("configurations");
+    }
+
+    private class ConfigValueEventListener implements ValueEventListener {
+        private final String passphrase;
+        private final Context context;
+        private final OnConfigChanged onConfigChanged;
+
+        public ConfigValueEventListener(String passphrase, Context context, OnConfigChanged onConfigChanged) {
+            this.passphrase = passphrase;
+            this.context = context;
+            this.onConfigChanged = onConfigChanged;
+        }
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            String value = dataSnapshot.child("configuration").getValue(String.class);
+            Configuration configuration = null;
+            try {
+                configuration = decryptConfiguration(passphrase, value, context);
+                if (configuration == null) {
+                    configuration = replaceConfigWithLocal(context);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                configuration = replaceConfigWithLocal(context);
+            } finally {
+                onConfigChanged.OnConfigChanged(configuration);
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
     }
 }

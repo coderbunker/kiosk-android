@@ -123,7 +123,6 @@ public class PasswordDialog extends Dialog {
         if (cptPwd == 5) {
             cptPwd = 0;
             checkPwd();
-            clearPwd();
         } else
             cptPwd++;
 
@@ -139,55 +138,58 @@ public class PasswordDialog extends Dialog {
     }
 
     private void checkPwd() {
-        Configuration configuration = Configuration.loadFromPreferences(getContext());
-        String otp = configuration.getPassphrase();
-        int hotpCounter = configuration.getHotpCounter();
-        if (otp == null) {
-            Toast.makeText(getContext(), "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
-            launchRunnable();
-        } else {
-            String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
-            System.out.println(otp);
-            String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
-            String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
-
-            if ("123456".equals(pwd)) {
-                launchRunnable();
-                return;
-            }
-
-            //HOTP
-            for (int i = 1; i <= 50; i++) {
-                int currentHotpCounter = hotpCounter + i;
-                System.out.println("hotp: " + currentHotpCounter);
-                if (pwd.equals(HOTP.generateHOTP(currentHotpCounter, otp))) {
-                    Toast.makeText(getContext(), "HOTP PIN correct", Toast.LENGTH_SHORT).show();
-
-                    hotpCounter = currentHotpCounter;
-                    System.out.println("final hotp counter: " + hotpCounter);
-                    configuration.setHotpCounter(hotpCounter);
-
-                    try {
-                        configuration.save();
-                    } catch (EncryptionException e) {
-                        e.printStackTrace();
-                        //do nothing
-                    }
+        Configuration.onConfigChanges(getContext(), new DatabaseConnection.OnConfigChanged() {
+            @Override
+            public void OnConfigChanged(Configuration configuration) {
+                String otp = configuration.getPassphrase();
+                int hotpCounter = configuration.getHotpCounter();
+                if (otp == null) {
+                    Toast.makeText(getContext(), "Please go to the settings and create a password", Toast.LENGTH_SHORT).show();
                     launchRunnable();
-                    return;
-                }
-            }
+                } else {
+                    String pwd = b1.getText().toString() + b2.getText().toString() + b3.getText().toString() + b4.getText().toString() + b5.getText().toString() + b6.getText().toString();
+                    String generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis());
+                    String previous_generated_number = TOTP.generateCurrentNumber(otp, System.currentTimeMillis() - 30000);
 
-            //TOTP
-            if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
-                Toast.makeText(getContext(), "TOTP PIN correct", Toast.LENGTH_SHORT).show();
-                launchRunnable();
-            } else {
-                dismiss();
-                Toast.makeText(getContext(), "Wrong PIN", Toast.LENGTH_SHORT).show();
+                    if ("123456".equals(pwd)) {
+                        launchRunnable();
+                        return;
+                    }
+
+                    //HOTP
+                    for (int i = 1; i <= 50; i++) {
+                        int currentHotpCounter = hotpCounter + i;
+                        if (pwd.equals(HOTP.generateHOTP(currentHotpCounter, otp))) {
+                            Toast.makeText(getContext(), "HOTP PIN correct", Toast.LENGTH_SHORT).show();
+
+                            hotpCounter = currentHotpCounter;
+                            configuration.setHotpCounter(hotpCounter);
+
+                            try {
+                                configuration.save();
+                            } catch (EncryptionException e) {
+                                e.printStackTrace();
+                                //do nothing
+                            }
+                            launchRunnable();
+                            return;
+                        }
+                    }
+
+                    //TOTP
+                    if (pwd.equals(generated_number) || pwd.equals(previous_generated_number)) {
+                        Toast.makeText(getContext(), "TOTP PIN correct", Toast.LENGTH_SHORT).show();
+                        launchRunnable();
+                        return;
+                    } else {
+                        dismiss();
+                        Toast.makeText(getContext(), "Wrong PIN", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                cptPwd = 0;
+                clearPwd();
             }
-        }
-        cptPwd = 0;
+        });
     }
 
     private void launchRunnable() {
