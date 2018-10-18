@@ -51,3 +51,6 @@ The tablet applys the url almost instantly.
 
 Backend configuration concept
 ![swimlanes](https://github.com/coderbunker/kiosk-android/blob/documentation/files/swimlanes.png)
+
+In the encryption we use PBKDF2 to generate a key from a passphrase and use this key to encrypt the config with AES.
+Because there is no authentification for storing something in the database, a tablet replaces the online config with the local one when it can't decrypt it.
