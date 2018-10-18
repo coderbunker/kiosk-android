@@ -10,7 +10,9 @@ The application covers the following features :
 - Enter kiosk mode from the application
 - Exit kiosk mode with an OTP (One-time password) from Google Authenticator.
 - Modify the URL of the website hosting the video
+- Claim the tablet and modify the website of the tablet online
 - Secret touch command to open OTP pin (touch screen 4 times in the right pace)
+- Viewer statistics
 
 Setup:
 
@@ -30,6 +32,22 @@ Config video:
 1. Setup website with [kiosk-web](https://github.com/coderbunker/kiosk-web)
 2. Set custom video in index.html
 3. Open settings in app and enter url to website
+
+Claiming a tablet:
+
+1. Open settings view
+2. Select claim tablet
+3. Enter a group name, a device name and a passphrase
+
+Edit url of clamimed tablet:
+
+1. Open https://kiosk-app-210502.firebaseapp.com ([Repository](https://github.com/coderbunker/kiosk-admin))
+2. Search by group name
+3. Select the tablet by device name
+4. Enter passphrase
+5. Edit url and save
+
+The tablet applys the url almost instantly.
 
 Backend configuration concept
 ![swimlanes](https://github.com/coderbunker/kiosk-android/blob/documentation/files/swimlanes.png)
