@@ -54,3 +54,11 @@ Backend configuration concept
 
 In the encryption we use PBKDF2 to generate a key from a passphrase and use this key to encrypt the config with AES.
 Because there is no authentification for storing something in the database, a tablet replaces the online config with the local one when it can't decrypt it.
+
+
+
+### Related Projects
+[kiosk-admin](https://github.com/coderbunker/kiosk-admin)
+
+[kiosk-web](https://github.com/coderbunker/kiosk-web)
+
